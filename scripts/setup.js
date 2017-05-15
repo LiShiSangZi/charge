@@ -50,31 +50,56 @@ function checkModule(config, update) {
 
     const missingMiddleware = false;
 
-    rawContent = rawContent.replace(reg, (matched, serviceList) => {
+    const contentDict = rawContent.split('\n');
 
-      if (testReg.test(serviceList)) {
-        return matched;
-      }
-      if (!update) {
-        missingMiddleware = true;
-        return matched;
-      }
-      let maxPos = -1;
-      let maxKey = null;
-      module.keycontext.forEach(context => {
-        const index = serviceList.indexOf(context);
-        if (index > maxPos) {
-          maxPos = index;
-          maxKey = context;
+    const tagReg = /^\[(.*?)\]$/;
+
+    contentDict.forEach((content, index) => {
+      if (content.length > 0) {
+        if (reg.test(content)) {
+          // Look back to check if do we need to check this key field's value:
+          if (service.ignore) {
+            let idx = index - 1;
+            let last = contentDict[idx];
+            while (last && !tagReg.test(last)) {
+              last = contentDict[--idx];
+            }
+
+            const tag = last.replace(tagReg, '$1');
+
+            if (service.ignore.indexOf(tag) >= 0) {
+              return;
+            }
+          }
+
+          if (!testReg.test(content)) {
+            if (!update) {
+              missingMiddleware = true;
+              return;
+            }
+
+            let maxPos = -1;
+            let maxKey = null;
+            module.keycontext.forEach(context => {
+              const index = content.indexOf(context);
+              if (index > maxPos) {
+                maxPos = index;
+                maxKey = context;
+              }
+            });
+            if (maxPos > -1) {
+              dirty = true;
+              content = content.replace(maxKey, `${maxKey} ${module.key}`);
+            }
+
+            contentDict[index] = content;
+          }
+
         }
-      });
-      if (maxPos > -1) {
-        dirty = true;
-        serviceList = serviceList.replace(maxKey, `${maxKey} ${module.key}`);
       }
-
-      return `${keyField} = ${serviceList}`;
     });
+
+    rawContent = content.join('\n');
 
     if (missingMiddleware) {
       throw new Error(`${fileName} does not configure the middleware. Please update it first.`);
@@ -104,7 +129,6 @@ function checkModule(config, update) {
 ${content}.`);
     }
   });
-
 
   if (errors.length > 0 && !update) {
     throw new Error(errors.join('\n'));
