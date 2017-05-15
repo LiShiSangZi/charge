@@ -1,0 +1,449 @@
+{
+  "config": {
+    "onerror": {
+      "errorPageUrl": "",
+      "appErrorFilter": null
+    },
+    "session": {
+      "maxAge": 86400000,
+      "key": "EGG_SESS",
+      "httpOnly": true,
+      "encrypt": true,
+      "overwrite": true,
+      "signed": true,
+      "encode": "<Function encode>",
+      "decode": "<Function decode>"
+    },
+    "i18n": {
+      "defaultLocale": "en_US",
+      "dir": "/opt/charge/config/locales",
+      "queryField": "locale",
+      "cookieField": "locale",
+      "cookieMaxAge": "1y",
+      "functionName": "__",
+      "dirs": [
+        "/opt/charge/node_modules/egg-onerror/config/locales",
+        "/opt/charge/node_modules/egg-session/config/locales",
+        "/opt/charge/node_modules/egg-i18n/config/locales",
+        "/opt/charge/node_modules/egg-watcher/config/locales",
+        "/opt/charge/node_modules/egg-multipart/config/locales",
+        "/opt/charge/node_modules/egg-development/config/locales",
+        "/opt/charge/node_modules/egg-schedule/config/locales",
+        "/opt/charge/node_modules/egg-logrotator/config/locales",
+        "/opt/charge/node_modules/egg-static/config/locales",
+        "/opt/charge/node_modules/egg-jsonp/config/locales",
+        "/opt/charge/node_modules/egg-view/config/locales",
+        "/opt/charge/node_modules/egg-sequelize/config/locales",
+        "/opt/charge/lib/plugin/memcached/config/locales",
+        "/opt/charge/node_modules/egg/config/locales",
+        "/opt/charge/config/locales"
+      ]
+    },
+    "watcher": {
+      "type": "development",
+      "eventSources": {
+        "default": "/opt/charge/node_modules/egg-watcher/lib/event-sources/default",
+        "development": "/opt/charge/node_modules/egg-watcher/lib/event-sources/development"
+      }
+    },
+    "multipart": {
+      "autoFields": false,
+      "defaultCharset": "utf8",
+      "fieldNameSize": 100,
+      "fieldSize": 102400,
+      "fields": 10,
+      "fileSize": 10485760,
+      "files": 10,
+      "fileExtensions": [],
+      "whitelist": null
+    },
+    "development": {
+      "watchDirs": [
+        "app.js",
+        "lib/plugin"
+      ],
+      "ignoreDirs": [],
+      "fastReady": true,
+      "reloadOnDebug": true,
+      "enable": true
+    },
+    "logrotator": {
+      "filesRotateByHour": null,
+      "filesRotateBySize": null,
+      "maxFileSize": 52428800,
+      "maxFiles": 10,
+      "rotateDuration": 60000,
+      "maxDays": 31
+    },
+    "static": {
+      "prefix": "/public/",
+      "dir": "/opt/charge/app/public",
+      "dynamic": true,
+      "preload": false,
+      "buffer": false
+    },
+    "jsonp": {
+      "limit": 50,
+      "callback": "_callback",
+      "csrf": false
+    },
+    "view": {
+      "root": "/opt/charge/app/view",
+      "cache": false,
+      "defaultExtension": ".html",
+      "defaultViewEngine": "",
+      "mapping": {}
+    },
+    "sequelize": {
+      "dialect": "mysql",
+      "database": "gringotts",
+      "host": "10.0.101.53",
+      "port": "3306",
+      "username": "gringotts",
+      "password": "<String len: 9>"
+    },
+    "env": "local",
+    "name": "charge",
+    "keys": "<String len: 16>",
+    "proxy": false,
+    "protocolHeaders": "x-forwarded-proto",
+    "ipHeaders": "x-forwarded-for",
+    "hostHeaders": "x-forwarded-host",
+    "pkg": {
+      "name": "charge",
+      "version": "0.0.1",
+      "main": "app.js",
+      "author": "gogocrow",
+      "license": "MIT",
+      "scripts": {
+        "dev": "egg-bin dev",
+        "test": "egg-bin test"
+      },
+      "devDependencies": {
+        "egg-bin": "^3.3.0"
+      },
+      "dependencies": {
+        "assert": "^1.4.1",
+        "chalk": "^1.1.3",
+        "egg": "^1.1.0",
+        "egg-mock": "^3.5.0",
+        "egg-sequelize": "^2.0.1",
+        "ini": "^1.3.4",
+        "memcached": "^2.2.2",
+        "mysql": "^2.13.0",
+        "supertest": "^3.0.0",
+        "uuid": "^3.0.1"
+      }
+    },
+    "baseDir": "/opt/charge",
+    "HOME": "/root",
+    "rundir": "/opt/charge/run",
+    "dump": {
+      "ignore": "<Set>"
+    },
+    "confusedConfigurations": {
+      "bodyparser": "bodyParser",
+      "notFound": "notfound",
+      "sitefile": "siteFile",
+      "middlewares": "middleware",
+      "httpClient": "httpclient"
+    },
+    "notfound": {
+      "pageUrl": ""
+    },
+    "siteFile": {
+      "/favicon.ico": "<Buffer len: 14191>"
+    },
+    "bodyParser": {
+      "enable": true,
+      "encoding": "utf8",
+      "formLimit": "100kb",
+      "jsonLimit": "100kb",
+      "strict": true,
+      "queryString": {
+        "arrayLimit": 100,
+        "depth": 5,
+        "parameterLimit": 1000
+      },
+      "returnRawBody": true
+    },
+    "logger": {
+      "dir": "/opt/charge/logs/charge",
+      "encoding": "utf8",
+      "env": "local",
+      "level": "DEBUG",
+      "consoleLevel": "INFO",
+      "outputJSON": false,
+      "buffer": false,
+      "appLogName": "charge-web.log",
+      "coreLogName": "egg-web.log",
+      "agentLogName": "egg-agent.log",
+      "errorLogName": "common-error.log",
+      "coreLogger": {
+        "consoleLevel": "WARN"
+      },
+      "type": "application"
+    },
+    "httpclient": {
+      "keepAlive": true,
+      "freeSocketKeepAliveTimeout": 4000,
+      "timeout": 30000,
+      "maxSockets": null,
+      "maxFreeSockets": 256,
+      "enableDNSCache": false
+    },
+    "coreMiddleware": [
+      "meta",
+      "siteFile",
+      "notfound",
+      "static",
+      "bodyParser",
+      "session",
+      "i18n"
+    ],
+    "workerStartTimeout": 600000,
+    "chargeModule": {
+      "modules": [
+        {
+          "name": "keystone",
+          "keyField": "pipeline",
+          "api": "keystone-paste.ini",
+          "service": "httpd"
+        },
+        {
+          "name": "nova"
+        },
+        {
+          "name": "cinder"
+        },
+        {
+          "name": "neutron",
+          "service": "neutron-server"
+        },
+        {
+          "name": "glance",
+          "service": "openstack-glance-api",
+          "api": "glance-api-paste.ini",
+          "keyField": "pipeline"
+        }
+      ],
+      "key": "billing",
+      "filter": {
+        "paste.filter_factory": "billingmiddleware.billing:filter_factory",
+        "billing_wsgi_url": "http://localhost:7001/${module}",
+        "pre_ignore_method": "HEAD, TRACE",
+        "post_ignore_method": "HEAD, TRACE"
+      },
+      "keycontext": [
+        "keystonecontext",
+        "authtoken",
+        "context",
+        "json_body",
+        "url_normalize"
+      ]
+    },
+    "keystone": {
+      "url": "http://10.0.101.53:35357/v3",
+      "username": "admin",
+      "userId": "732407c2ee4f4f99ac6639b386c299c0",
+      "password": "<String len: 24>",
+      "projectName": "admin",
+      "projectId": "cd5f1e02d9ad439abed7760afe0bd70e",
+      "cachedKey": "temp_token"
+    },
+    "charge": {
+      "billing_role": "billing_owner",
+      "catalog": {
+        "name": "gringotts",
+        "type": "billing",
+        "endpoints": {
+          "RegionOne": "http://10.0.101.53:7001/v2"
+        }
+      }
+    },
+    "requireMerge": false,
+    "memcached": {
+      "client": {
+        "nodes": {
+          "hosts": [
+            "10.0.101.53:11211"
+          ]
+        }
+      }
+    },
+    "coreMiddlewares": [
+      "meta",
+      "siteFile",
+      "notfound",
+      "static",
+      "bodyParser",
+      "session",
+      "i18n"
+    ],
+    "appMiddlewares": [],
+    "appMiddleware": [],
+    "multipartParseOptions": {
+      "autoFields": false,
+      "defCharset": "utf8",
+      "limits": {
+        "fieldNameSize": 100,
+        "fieldSize": 102400,
+        "fields": 10,
+        "fileSize": 10485760,
+        "files": 10
+      },
+      "checkFile": "<Function checkFile>"
+    }
+  },
+  "plugins": {
+    "onerror": {
+      "enable": true,
+      "package": "egg-onerror",
+      "name": "onerror",
+      "dependencies": [],
+      "optionalDependencies": [],
+      "env": [],
+      "from": "/opt/charge/node_modules/egg/config/plugin.js",
+      "path": "/opt/charge/node_modules/egg-onerror",
+      "version": "1.3.0"
+    },
+    "session": {
+      "enable": true,
+      "package": "egg-session",
+      "name": "session",
+      "dependencies": [],
+      "optionalDependencies": [],
+      "env": [],
+      "from": "/opt/charge/node_modules/egg/config/plugin.js",
+      "path": "/opt/charge/node_modules/egg-session",
+      "version": "2.1.0"
+    },
+    "i18n": {
+      "enable": true,
+      "package": "egg-i18n",
+      "name": "i18n",
+      "dependencies": [],
+      "optionalDependencies": [],
+      "env": [],
+      "from": "/opt/charge/node_modules/egg/config/plugin.js",
+      "path": "/opt/charge/node_modules/egg-i18n",
+      "version": "1.1.0"
+    },
+    "watcher": {
+      "enable": true,
+      "package": "egg-watcher",
+      "name": "watcher",
+      "dependencies": [],
+      "optionalDependencies": [],
+      "env": [],
+      "from": "/opt/charge/node_modules/egg/config/plugin.js",
+      "path": "/opt/charge/node_modules/egg-watcher",
+      "version": "2.1.1"
+    },
+    "multipart": {
+      "enable": true,
+      "package": "egg-multipart",
+      "name": "multipart",
+      "dependencies": [],
+      "optionalDependencies": [],
+      "env": [],
+      "from": "/opt/charge/node_modules/egg/config/plugin.js",
+      "path": "/opt/charge/node_modules/egg-multipart",
+      "version": "1.2.0"
+    },
+    "development": {
+      "enable": true,
+      "package": "egg-development",
+      "name": "development",
+      "dependencies": [
+        "watcher"
+      ],
+      "optionalDependencies": [],
+      "env": [
+        "local"
+      ],
+      "from": "/opt/charge/node_modules/egg/config/plugin.js",
+      "path": "/opt/charge/node_modules/egg-development",
+      "version": "1.3.0"
+    },
+    "schedule": {
+      "enable": true,
+      "package": "egg-schedule",
+      "name": "schedule",
+      "dependencies": [],
+      "optionalDependencies": [],
+      "env": [],
+      "from": "/opt/charge/node_modules/egg/config/plugin.js",
+      "path": "/opt/charge/node_modules/egg-schedule",
+      "version": "2.3.0"
+    },
+    "logrotator": {
+      "enable": true,
+      "package": "egg-logrotator",
+      "name": "logrotator",
+      "dependencies": [
+        "schedule"
+      ],
+      "optionalDependencies": [],
+      "env": [],
+      "from": "/opt/charge/node_modules/egg/config/plugin.js",
+      "path": "/opt/charge/node_modules/egg-logrotator",
+      "version": "2.2.2"
+    },
+    "static": {
+      "enable": true,
+      "package": "egg-static",
+      "name": "static",
+      "dependencies": [],
+      "optionalDependencies": [],
+      "env": [],
+      "from": "/opt/charge/node_modules/egg/config/plugin.js",
+      "path": "/opt/charge/node_modules/egg-static",
+      "version": "1.3.0"
+    },
+    "jsonp": {
+      "enable": true,
+      "package": "egg-jsonp",
+      "name": "jsonp",
+      "dependencies": [],
+      "optionalDependencies": [
+        "security"
+      ],
+      "env": [],
+      "from": "/opt/charge/node_modules/egg/config/plugin.js",
+      "path": "/opt/charge/node_modules/egg-jsonp",
+      "version": "1.0.0"
+    },
+    "view": {
+      "enable": true,
+      "package": "egg-view",
+      "name": "view",
+      "dependencies": [],
+      "optionalDependencies": [],
+      "env": [],
+      "from": "/opt/charge/node_modules/egg/config/plugin.js",
+      "path": "/opt/charge/node_modules/egg-view",
+      "version": "1.1.0"
+    },
+    "sequelize": {
+      "enable": true,
+      "package": "egg-sequelize",
+      "name": "sequelize",
+      "dependencies": [],
+      "optionalDependencies": [],
+      "env": [],
+      "from": "/opt/charge/config/plugin.js",
+      "path": "/opt/charge/node_modules/egg-sequelize",
+      "version": "2.0.1"
+    },
+    "memcached": {
+      "enable": true,
+      "path": "/opt/charge/lib/plugin/memcached",
+      "name": "memcached",
+      "dependencies": [],
+      "optionalDependencies": [],
+      "env": [],
+      "from": "/opt/charge/config/plugin.js"
+    }
+  }
+}

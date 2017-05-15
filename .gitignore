@@ -35,3 +35,13 @@ jspm_packages
 
 # Optional REPL history
 .node_repl_history
+
+# Upload file.
+.uploadrc
+
+# Configure file.
+config.default.js
+
+# Yarn lock.
+yarn.lock
+
