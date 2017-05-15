@@ -48,7 +48,7 @@ function checkModule(config, update) {
 
     const testReg = new RegExp(`\ ${config.key}(\ |$)`);
 
-    const missingMiddleware = false;
+    let missingMiddleware = false;
 
     const contentDict = rawContent.split('\n');
 
@@ -77,7 +77,6 @@ function checkModule(config, update) {
               missingMiddleware = true;
               return;
             }
-
             let maxPos = -1;
             let maxKey = null;
             module.keycontext.forEach(context => {
@@ -99,7 +98,7 @@ function checkModule(config, update) {
       }
     });
 
-    rawContent = content.join('\n');
+    rawContent = contentDict.join('\n');
 
     if (missingMiddleware) {
       throw new Error(`${fileName} does not configure the middleware. Please update it first.`);
