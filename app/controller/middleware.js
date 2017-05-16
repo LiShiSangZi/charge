@@ -8,13 +8,33 @@ async function preOperationData(ctx, module, request_id, request_headers,
   const domainId = request_headers['X-Project-Domain-Id'];
 
   let catalog = [];
+  const reg = new RegExp(`^${module}`);
   if (request_headers['X-Service-Catalog']) {
     catalog = JSON.parse(request_headers['X-Service-Catalog']);
+  } else {
+    const tokenObj = await ctx.service.token.getToken();
+    const projectId = request_headers['X-Tenant-Id'];
+
+    Object.keys(tokenObj.endpoint).forEach(endpointName => {
+      if (reg.test(endpointName)) {
+        const ob = tokenObj.endpoint[endpointName];
+        const list = [];
+        Object.keys(ob).forEach(region => {
+          list.push({
+            publicURL: ob[region].replace(/([0-9,a-f]{20,})/, projectId),
+            region: region,
+          })
+        });
+        catalog.push({
+          "name": endpointName,
+          "endpoints": list
+        });
+      }
+    });
   }
   let targetUrl = null;
   let targetRegion = null;
   let targetPath = '';
-  const reg = new RegExp(`^${module}`);
   const endpoint = catalog.filter(c => reg.test(c.name));
   endpoint.forEach(endpoint => {
     const endpoints = endpoint.endpoints;
@@ -32,6 +52,7 @@ async function preOperationData(ctx, module, request_id, request_headers,
     return found;
   });
   const pathArray = targetPath.split('/').map(k => k.replace(/^(.*)\-/g, ''));
+  
   if (pathArray.length > 0 && /v(\d)/.test(pathArray[0])) {
     pathArray.shift();
   }
