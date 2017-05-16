@@ -41,11 +41,10 @@ module.exports = app => {
       fields: ["product_id", "name", "service"]
     }],
     classMethods: {
-      async findProduct(region_id, service, name) {
+      async findProduct(region_id, name) {
         return await this.findOne({
           where: {
             region_id,
-            service,
             name,
           }
         });
