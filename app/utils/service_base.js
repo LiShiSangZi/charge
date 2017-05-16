@@ -81,7 +81,6 @@ module.exports = (app) => {
           // FIXME: Throw an error for this.
           return;
         }
-        
         await this.freeze(option.price, option.price,
           option.product.product_id, project.account.user_id, opt);
 
@@ -98,7 +97,8 @@ module.exports = (app) => {
         attr.region = tempOrder.region;
         attr.project_id = tempOrder.project_id;
         attr.domain_id = tempOrder.domain_id;
-        attr.type = tempOrder.type
+        attr.type = tempOrder.type;
+        attr.user_id = tempOrder.user_id;
         attr.product_id = tempOrder.product_id;
 
         // 解冻费用。生成order。
@@ -292,7 +292,7 @@ module.exports = (app) => {
 
     async getProduct(service, tag, region, body, catalogs) {
       const name = await this.getProductName(service, tag, body, catalogs, region);
-      const res = await this.ctx.model.Product.findProduct(region, service, name);
+      const res = await this.ctx.model.Product.findProduct(region, name);
       if (res) {
         const ob = res.dataValues;
         return ob;
@@ -355,7 +355,6 @@ module.exports = (app) => {
       };
 
       const obj = await this.getTokenAndEndpoint(o);
-
       const res = await this.ctx.curl(this.formAPIQueryStr(service, tag, obj, rest), {
         method: 'GET',
         dataType: 'json',
