@@ -16,8 +16,12 @@ exports.create = async(ctx) => {
   const body = ctx.request.body;
   const name = body.name;
   const [module, tag, ...rest] = name.split(':');
+
+  if (!module || !tag) {
+    ctx.throw(400, 'The product name should look like ${module}:${type}.');
+  }
   if (module === 'nova' && tag === 'server' && rest.length < 1) {
-    ctx.throw(400);
+    ctx.throw(400, 'You need to speicific flavor for nova server\'s product.');
   }
   /**
    * TODO: 扫描所有现有的资源，找到所有相关的资源，并且生成新的order。
@@ -30,14 +34,6 @@ exports.create = async(ctx) => {
   } else {
     service = ctx.service.common;
   }
-
-  const instance = await ctx.model.Product.create({
-    "name": body.name,
-    "service": body.service,
-    "region_id": body.region_id,
-    "description": body.description,
-    "unit_price": JSON.stringify(body.unit_price),
-  });
 
   /**
    * Fetch all the project list so that we can provide the domain_id and project_id for order.
@@ -52,6 +48,16 @@ exports.create = async(ctx) => {
 
 
   const resources = await service.getFullResources(module, tag, region, rest);
+
+  if (resources && resources[tag]) {
+    const instance = await ctx.model.Product.create({
+      "name": body.name,
+      "service": body.service,
+      "region_id": body.region_id,
+      "description": body.description,
+      "unit_price": JSON.stringify(body.unit_price),
+    });
+  }
 
   const keyFields = `${tag}s`;
 
@@ -70,7 +76,7 @@ exports.create = async(ctx) => {
         projectOpt = await ctx.model.Project.findProjectWithAccountById(projectId);
         cachedProjects[projectId] = projectOpt;
       }
-      
+
       if (!projectOpt || !projectOpt.user_id) {
         // The project does not have billing owner. Skip this.
         continue;
@@ -251,7 +257,4 @@ exports.update = async(ctx) => {
       "result": "Done"
     };
   }
-  /**
-   * TODO: 扫描所有相关的order，并且更新价格。
-   */
 }
