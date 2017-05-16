@@ -40,7 +40,7 @@ jspm_packages
 .uploadrc
 
 # Configure file.
-config.default.js
+config.default.js*
 
 # Yarn lock.
 yarn.lock

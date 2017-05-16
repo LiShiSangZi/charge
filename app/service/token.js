@@ -96,7 +96,6 @@ module.exports = app => {
       });
 
       const services = result.data;
-
       const config = this.ctx.app.config.charge.catalog;
       let found = null;
       services.services.some(service => {
