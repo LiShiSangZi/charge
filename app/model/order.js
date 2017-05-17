@@ -1,7 +1,7 @@
 'use strict';
 const uuidV4 = require('uuid/v4');
 
-const ATTRIBUTES = ['id', 'order_id', 'resource_id', 'type', 'status', 'deduct_id',
+const ATTRIBUTES = ['id', 'order_id', 'resource_name', 'resource_id', 'type', 'status', 'deduct_id', 'region',
   'unit_price', 'unit', 'total_price', 'user_id', 'project_id', 'domain_id',
   'created_at', 'updated_at',
 ];

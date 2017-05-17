@@ -54,8 +54,21 @@ module.exports = app => {
       return resource['os-vol-tenant-attr:tenant_id'];
     }
 
-    formAPIQueryStr(service, tag, obj) {
+    async getProductName(service, tag, body, catalogs, region) {
+      const volumeType = body.volume.volume_type;
+      return `cinder:volume:${volumeType}`;
+    }
+
+    formAPIQueryStr(service, tag, obj, rest) {
       return `${obj.endpoint}/${tag}s/detail?all_tenants=1`;
+    }
+
+    async filterResult(result, service, tag, obj, rest) {
+      if (rest && rest.length > 0) {
+        return result.filter(v => v.volume_type === res[0]);
+      } else {
+        return result;
+      }
     }
   }
   return Volume;

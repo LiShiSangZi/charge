@@ -11,6 +11,7 @@ async function preOperationData(ctx, module, request_id, request_headers,
   const reg = new RegExp(`^${module}`);
   if (request_headers['X-Service-Catalog']) {
     catalog = JSON.parse(request_headers['X-Service-Catalog']);
+    ctx.service.token.formatEndpoint(catalog);
   } else {
     const tokenObj = await ctx.service.token.getToken();
     const projectId = request_headers['X-Tenant-Id'];

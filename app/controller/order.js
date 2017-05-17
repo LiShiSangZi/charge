@@ -5,8 +5,20 @@ exports.list = async ctx => {
   const limit = parseInt(ctx.query.limit, 10);
   const offset = parseInt(ctx.query.offset, 10);
   const order = await ctx.app.model.Order.findAndCounts(userId, limit, offset);
+  const newOrders = order.rows.map(row => {
+    const newRow = {};
+    Object.keys(row.dataValues).forEach(k => {
+      if (k === 'region') {
+        newRow['region_id'] = row.region;
+        return;
+      }
+      newRow[k] = row[k];
+    });
+    return newRow;
+  });
+  
   ctx.body = {
-    orders: order.rows,
+    orders: newOrders,
     total_count: order.count,
   };
 };

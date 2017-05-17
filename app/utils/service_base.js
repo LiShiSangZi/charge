@@ -179,9 +179,12 @@ module.exports = (app) => {
      * @param {*String} region 
      */
     async closeOrder(uuid, region) {
+      if (!region) {
+        region = 'RegionOne';
+      }
       // Check if we have any order for the uuid:
       const orders = await this.ctx.model.Order.findOrderByResource(uuid, region);
-
+      console.log(orders);
       let promises = [];
       let promisesIndex = 0;
       for (let i = 0; i < orders.length; i++) {
@@ -225,7 +228,7 @@ module.exports = (app) => {
      * Parse the uuid out from a request url.
      */
     parseDeleteUUID(url) {
-      return url.replace(/\/$/, '').replace(/^(.*)\//, '');
+      return url.replace(/\/$/, '').replace(/^(.*)\//, '').replace(/\?(.*)$/, '');
     }
 
     /**
@@ -233,7 +236,7 @@ module.exports = (app) => {
      * @param {*Options} opt 
      */
     parsePutUUID(opt) {
-      return opt.requestUrl.replace(/\/$/, '').replace(/^(.*)\//, '');
+      return opt.requestUrl.replace(/\/$/, '').replace(/^(.*)\//, '').replace(/\?(.*)$/, '');
     }
 
     /**
@@ -302,7 +305,7 @@ module.exports = (app) => {
 
 
     formAPIQueryStr(service, tag, obj, rest) {
-      return `${obj.endpoint}/${tag}s`;
+      return `${obj.endpoint}/${tag}s?all_tenants=1`;
     }
 
     /**
@@ -323,7 +326,7 @@ module.exports = (app) => {
     }
 
     async getProjectId(resource) {
-      return resource.projectId;
+      return resource.projectId || resource.tenant_id || resource.project_id;
     }
 
     async getUserId(resource) {
@@ -345,6 +348,10 @@ module.exports = (app) => {
       };
     }
 
+    async filterResult(result, service, tag, obj, rest) {
+      return result;
+    }
+
     /**
      * Get the full list of resource according to the parameter.
      */
@@ -355,6 +362,7 @@ module.exports = (app) => {
       };
 
       const obj = await this.getTokenAndEndpoint(o);
+
       const res = await this.ctx.curl(this.formAPIQueryStr(service, tag, obj, rest), {
         method: 'GET',
         dataType: 'json',
@@ -365,7 +373,7 @@ module.exports = (app) => {
       });
 
       if (res && res.data) {
-        return res.data;
+        return await this.filterResult(res.data, tag, obj, rest);
       }
     }
   }

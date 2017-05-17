@@ -22,6 +22,12 @@ exports.create = async(ctx) => {
   }
   if (module === 'nova' && tag === 'server' && rest.length < 1) {
     ctx.throw(400, 'You need to speicific flavor for nova server\'s product.');
+  } else if (module === 'cinder') {
+    if (rest.length < 1) {
+      if (tag === 'volume' || tag === 'snapshot') {
+        ctx.throw(400, 'You need to speicific the volume type.');
+      }
+    }
   }
   /**
    * TODO: 扫描所有现有的资源，找到所有相关的资源，并且生成新的order。
@@ -45,21 +51,22 @@ exports.create = async(ctx) => {
   };
 
   const endpointObj = await service.getTokenAndEndpoint(query);
-
-
+  
   const resources = await service.getFullResources(module, tag, region, rest);
 
-  if (resources && resources[tag]) {
-    const instance = await ctx.model.Product.create({
+  let instance;
+  const keyFields = `${tag}s`;
+  if (resources && resources[keyFields]) {
+    instance = await ctx.model.Product.create({
       "name": body.name,
-      "service": body.service,
+      "service": body.service || module,
       "region_id": body.region_id,
       "description": body.description,
       "unit_price": JSON.stringify(body.unit_price),
     });
+  } else {
+    ctx.throw(400, 'Name is invalid!');
   }
-
-  const keyFields = `${tag}s`;
 
   const priceObj = body.unit_price;
 

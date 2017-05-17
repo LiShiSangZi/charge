@@ -69,7 +69,11 @@ module.exports = app => {
           const endpoints = ca.endpoints;
           endpoints.forEach(endpoint => {
             if (endpoint.interface === 'public') {
-              catalog[name][endpoint.region_id] = endpoint.url;
+              if (name === 'neutron' && !/\/2.0/.test(endpoint.url)) {
+                catalog[name][endpoint.region_id] = `${endpoint.url}/v2.0`
+              } else {
+                catalog[name][endpoint.region_id] = endpoint.url;
+              }
             }
           });
         });
@@ -81,6 +85,20 @@ module.exports = app => {
         "token": obj.token,
         "endpoint": obj.catalog,
       }
+    }
+
+    formatEndpoint(catalogs) {
+      catalogs.forEach(catalog => {
+        if (catalog.name === 'neutron') {
+          catalog.endpoints.forEach(endpoint => {
+            Object.keys(endpoint).forEach(key => {
+              if (/URL$/.test(key)) {
+                endpoint[key] = `${endpoint[key]}/v2.0`;
+              }
+            });
+          })
+        }
+      });
     }
 
     /**
