@@ -53,7 +53,7 @@ module.exports = app => {
         }
         const user = users.get(project.user_id);
         let newDeduct = false;
-        const original = new Date(deduct.created_at);
+        const original = new Date(Date.parse(deduct.created_at));
         if (ctx.app.config.schedule.singleOrderDuration == 'h') {
           // 按小时分deduct:
           original.setHours(original.getHours(), 0, 0, 0);

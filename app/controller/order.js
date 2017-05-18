@@ -45,6 +45,7 @@ exports.detail = async ctx => {
   const now = Date.now();
 
   const deduct = await ctx.app.model.Deduct.filterByOrder(orderId, limit, offset);
+  
   const result = deduct.rows.map(row => {
     return {
       "end_time": row.updated_at,

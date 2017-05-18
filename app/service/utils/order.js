@@ -36,16 +36,11 @@ module.exports = (app) => {
 
       const lastUpdate = deduct.created_at.getTime();
       const duration = Math.round((now - lastUpdate) / 1000);
-      const totalCharge = duration * priceInSec;
+      let totalCharge = duration * priceInSec;
+      totalCharge = Math.max(totalCharge, deduct.get('money'));
       const chMoney = totalCharge - deduct.get('money');
-      // deduct.set('money', parseFloat(totalCharge.toFixed(4)));
-      promises[promiseIndex++] = this.ctx.app.model.Deduct.update({
-        "money": parseFloat(totalCharge.toFixed(4)),
-      }, {
-        where: {
-          deduct_id: order.deduct_id,
-        }
-      }); //deduct.save();
+      deduct.set('money', parseFloat(totalCharge.toFixed(4)));
+      promises[promiseIndex++] = deduct.save();
       if (createNew) {
         const uuid = uuidV4();
         // Create a new empty deduct.

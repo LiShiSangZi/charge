@@ -94,8 +94,9 @@ module.exports = app => {
       }
     },
     hooks: {
-      beforeUpdate(instance) {
-        console.log(instance);
+      beforeUpdate: function(instance) {
+
+        // console.log(instance.dataValues.created_at, instance.dataValues.updated_at);
       }
     }
   });
