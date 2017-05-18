@@ -16,26 +16,39 @@ exports.detail = async(ctx) => {
 exports.charge = async(ctx) => {
   const userId = ctx.params.userId;
   const body = ctx.request.body;
-  if (Object.keys(body).length === 1 && body.value) {
-    const addValue = parseFloat(body.value, 10);
-    if (isNaN(addValue)) {
-      ctx.throw(400, 'The value should be a valid number');
-      return;
-    }
+  const addValue = parseFloat(body.value, 10);
+  if (isNaN(addValue)) {
+    ctx.throw(400, 'The value should be a valid number');
+    return;
+  }
+
+  const query = {
+    "amount": addValue,
+    "user_id": userId,
+  };
+
+  if (body.type && body.come_from) {
+    query.type = body.type;
+    query.come_from = body.come_from;
+  } else {
+    query.operator = ctx.user.id;
+  }
+
+  // TODO: May need to lock the table.
+  const chargeRec = await ctx.app.model.Charge.create(query);
+
+  if (chargeRec) {
     const account = await ctx.app.model.Account.getAccountById(userId);
     if (!account.balance) {
       account.balance = addValue;
     } else {
       account.balance += addValue;
     }
-    // TODO: May need to lock the table.
     account.save();
-    ctx.body = {
-      "message": "Done",
-    };
-  } else {
-    ctx.throw(400, 'Does not to allow modify any other parameters.');
   }
+  ctx.body = {
+    "message": "Done",
+  };
 
 }
 

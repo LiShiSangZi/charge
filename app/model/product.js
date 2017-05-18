@@ -31,6 +31,9 @@ module.exports = app => {
     region_id: STRING(255),
     description: STRING(255),
     unit_price: TEXT,
+    unit: {
+      type: TEXT
+    },
     deleted: INTEGER(1)
   }, {
     underscored: true,
@@ -53,7 +56,7 @@ module.exports = app => {
         const res = await this.findAll({
           attributes: ['product_id', 'name',
             'service', 'region_id', 'description',
-            'unit_price', 'created_at', 'updated_at'
+            'unit_price', 'unit', 'created_at', 'updated_at'
           ]
         });
 

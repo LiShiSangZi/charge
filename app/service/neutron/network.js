@@ -10,11 +10,6 @@ module.exports = app => {
       super(ctx);
       this.tag = 'network';
     }
-
-
-    formAPIQueryStr(service, tag, obj) {
-      return `${obj.endpoint}/v2.0/${tag}s`;
-    }
     
   }
   return Network;

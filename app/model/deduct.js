@@ -93,5 +93,10 @@ module.exports = app => {
         });
       }
     },
+    hooks: {
+      beforeUpdate(instance) {
+        console.log(instance);
+      }
+    }
   });
 }

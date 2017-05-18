@@ -51,7 +51,7 @@ exports.create = async(ctx) => {
   };
 
   const endpointObj = await service.getTokenAndEndpoint(query);
-  
+
   const resources = await service.getFullResources(module, tag, region, rest);
 
   let instance;
@@ -127,6 +127,46 @@ exports.create = async(ctx) => {
   ctx.body = {
     product: instance.toJSON()
   }
+};
+
+exports.showPrice = async(ctx) => {
+
+  const billingMethod = ctx.query['purchase.billing_method'];
+  let index = 0;
+  const productQuery = [];
+  let productName = ctx.query[`purchase.purchases[${index}].product_name`];
+  while (productName) {
+    productQuery[index] = {
+      "name": productName,
+      "regionId": ctx.query[`purchase.purchases[${index}].region_id`],
+      "quantity": parseInt(ctx.query[`purchase.purchases[${index}].quantity`], 10),
+    }
+    index++;
+    productName = ctx.query[`purchase.purchases[${index}].product_name`];
+  }
+
+  const products = await ctx.model.Product.listAll();
+
+  const res = products.filter(prod => {
+    if (prod.unit !== billingMethod) {
+      return false;
+    }
+    const res = productQuery.find((ele) =>
+      (ele.name === prod.name && ele.regionId === prod.region_id));
+    if (res) {
+      prod.total_price = prod.unit_price * res.quantity;
+      return true;
+    }
+    return false;
+  }).map(prod => {
+    return {
+      "total_price": prod.total_price,
+      "unit": prod.unit,
+      "unit_price": prod.unit_price,
+    }
+  });
+
+  ctx.body = res;
 };
 
 async function closeOrders(ctx) {

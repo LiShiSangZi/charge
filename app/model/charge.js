@@ -33,6 +33,11 @@ module.exports = app => {
       primaryKey: true,
       unique: true
     },
+    come_from: STRING(255),
+    operator: {
+      type: UUID,
+      primaryKey: true,
+    },
     user_id: {
       type: UUID,
       defaultValue: UUIDV4,
@@ -50,7 +55,19 @@ module.exports = app => {
       fields: ["charge_id", "user_id"]
     }],
     classMethods: {
-      
+      fetchCharge(id, limit, offset) {
+        return this.findAndCount({
+          limit: limit,
+          offset: offset,
+          where: {
+            user_id: id,
+          },
+          order: [
+            ['created_at', 'DESC'],
+            ['updated_at', 'DESC']
+          ],
+        });
+      }
     }
   });
 };

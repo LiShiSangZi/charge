@@ -44,7 +44,7 @@ module.exports = (app) => {
       } else if (opt.phase === 'after') {
         const tempOrder = await this.ctx.model.Frozen.findByRequestId(opt.requestId);
         if (!tempOrder) {
-          throw new Error('Error: the billing system can not process your order!');
+          return;
         }
 
         // End the exist order:
@@ -77,6 +77,9 @@ module.exports = (app) => {
      * @param {*Options} opt 
      */
     async POST(opt) {
+      if (!opt.tag || opt.tag.length < 1) {
+        return;
+      }
       if (opt.phase === 'before') {
         const option = await this.getPriceAndAmountOption(opt);
         if (!option) {
@@ -192,7 +195,6 @@ module.exports = (app) => {
       }
       // Check if we have any order for the uuid:
       const orders = await this.ctx.model.Order.findOrderByResource(uuid, region);
-      console.log(orders);
       let promises = [];
       let promisesIndex = 0;
       for (let i = 0; i < orders.length; i++) {

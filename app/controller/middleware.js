@@ -1,7 +1,7 @@
 'use strict';
 
 async function preOperationData(ctx, module, request_id, request_headers,
-  request_method, request_url, request_body, response_status, 
+  request_method, request_url, request_body, response_status,
   response_body, phase) {
   const userId = request_headers['X-User-Id'];
   const projectId = request_headers['X-Project-Id'];
@@ -53,7 +53,7 @@ async function preOperationData(ctx, module, request_id, request_headers,
     return found;
   });
   const pathArray = targetPath.split('/').map(k => k.replace(/^(.*)\-/g, ''));
-  
+
   if (pathArray.length > 0 && /v(\d)/.test(pathArray[0])) {
     pathArray.shift();
   }
@@ -86,11 +86,6 @@ async function preOperationData(ctx, module, request_id, request_headers,
 exports.catch = async(ctx) => {
   const req = ctx.request;
 
-  if (/^\/keystone/.test(req.url)) {
-    ctx.body = 'Done';
-    return;
-  }
-
   const {
     request_method,
     request_url,
@@ -98,6 +93,13 @@ exports.catch = async(ctx) => {
     response_status,
     request_headers,
   } = req.body;
+
+  console.log(req.url, request_method, request_url);
+
+  if (/^\/keystone/.test(req.url) && /\/auth\/tokens$/.test(request_url)) {
+    ctx.body = 'Done';
+    return;
+  }
 
   let request_body = req.body.request_body;
   let response_body = req.body.response_text;

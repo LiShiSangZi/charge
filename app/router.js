@@ -13,6 +13,7 @@ module.exports = app => {
   app.post(`/${APIVERSION}/products`, 'product.create');
   app.delete(`/${APIVERSION}/products/:product_id`, 'product.delete');
   app.put(`/${APIVERSION}/products/:product_id`, 'product.update');
+  app.get(`/${APIVERSION}/products/price`, 'product.showPrice');
 
   app.get(`/${APIVERSION}/accounts/:userId`, 'account.detail');
   app.put(`/${APIVERSION}/accounts/:userId`, 'account.charge');

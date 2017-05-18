@@ -15,7 +15,7 @@ module.exports = (app) => {
      * @param {Boolean} close will close the order if true.
      * @param {Boolean} createNew will create a new deduct.
      */
-    async calOrder(order, deduct, project, user, close, createNew, currentTime) {
+    async calOrder(order, deduct, project, user, close, createNew) {
       const promises = [];
       let promiseIndex = 0;
       if (deduct && order.deduct_id !== deduct.deduct_id) {
@@ -31,16 +31,21 @@ module.exports = (app) => {
       }
 
       const priceInSec = order.unit_price / priceUnit;
-      const now = currentTime || Date.now();
+      const now = Date.now();
 
 
       const lastUpdate = deduct.created_at.getTime();
       const duration = Math.round((now - lastUpdate) / 1000);
       const totalCharge = duration * priceInSec;
       const chMoney = totalCharge - deduct.get('money');
-      deduct.set('money', parseFloat(totalCharge.toFixed(4)));
-      deduct.set('updated_at', new Date(now));
-      promises[promiseIndex++] = deduct.save();
+      // deduct.set('money', parseFloat(totalCharge.toFixed(4)));
+      promises[promiseIndex++] = this.ctx.app.model.Deduct.update({
+        "money": parseFloat(totalCharge.toFixed(4)),
+      }, {
+        where: {
+          deduct_id: order.deduct_id,
+        }
+      }); //deduct.save();
       if (createNew) {
         const uuid = uuidV4();
         // Create a new empty deduct.
@@ -55,9 +60,9 @@ module.exports = (app) => {
         order.deduct_id = uuid;
       }
       order.total_price += chMoney;
-      if (chMoney > 0) {
-        order.set('updated_at', new Date(now));
-      }
+      // if (chMoney > 0) {
+      //   order.set('updated_at', now);
+      // }
 
       if (close) {
         // close the order:
