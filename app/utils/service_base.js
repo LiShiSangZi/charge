@@ -10,6 +10,14 @@ module.exports = (app) => {
       super(ctx);
     }
 
+    async OPTION(opt) {
+      
+    }
+
+    async PATCH(opt) {
+      // Did nothing for now.
+    }
+
     /**
      * For update: Close the current order and create a new one.
      * @param {*Options} opt 

@@ -15,6 +15,7 @@ module.exports = app => {
   app.put(`/${APIVERSION}/products/:product_id`, 'product.update');
 
   app.get(`/${APIVERSION}/accounts/:userId`, 'account.detail');
+  app.put(`/${APIVERSION}/accounts/:userId`, 'account.charge');
   app.get(`/${APIVERSION}/accounts`, 'account.list');
   app.post(`/${APIVERSION}/accounts`, 'account.create');
 
