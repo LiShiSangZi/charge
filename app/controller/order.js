@@ -5,11 +5,15 @@ exports.list = async ctx => {
   const limit = parseInt(ctx.query.limit, 10);
   const offset = parseInt(ctx.query.offset, 10);
   const status = ctx.query.status;
+  const resource_id = ctx.query.resource_id;
   const opt = {
     user_id: userId,
   };
   if (status) {
     opt.status = status;
+  }
+  if (resource_id) {
+    opt.resource_id = resource_id;
   }
   const order = await ctx.app.model.Order.findAndCounts(opt, limit, offset);
   const newOrders = order.rows.map(row => {
