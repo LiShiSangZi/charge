@@ -113,14 +113,12 @@ module.exports = app => {
           }
         });
       },
-      async findAndCounts(userId, limit, offset) {
+      async findAndCounts(opt, limit, offset) {
         return await this.findAndCount({
           attributes: ATTRIBUTES,
           limit: limit,
           offset: offset,
-          where: {
-            user_id: userId,
-          },
+          where: opt,
           order: [
             ['created_at', 'DESC'],
             ['updated_at', 'DESC']

@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "egg-bin dev",
-    "test": "egg-bin test"
+    "migrate": "egg-bin test"
   },
   "devDependencies": {
     "egg-bin": "^3.3.0"
