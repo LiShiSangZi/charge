@@ -26,7 +26,7 @@ module.exports = app => {
             },
           });
           if (res.data && res.data.volume && res.data.volume.size) {
-            return volume.size;
+            return res.data.volume.size;
           }
         }
       }
