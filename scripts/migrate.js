@@ -50,7 +50,7 @@ const action = async() => {
       status = 'deleted';
     }
     const consumption = user.consumption || 0;
-    userData[index] = `('${user.user_id}', ${user.balance}, ${consumption}, 'CNY', ${user.level}, ${user.owed}, '${user.domain_id}', '', 0, 0, '', '${status}', ${user.frozen_balance}, '${user.created_at}', '${user.updated_at}')`;
+    userData[index] = `('${user.user_id}', ${user.balance}, ${consumption}, 'CNY', ${user.level}, ${user.owed}, '${user.domain_id}', '', 0, 0, '', '${status}', ${user.frozen_balance}, '${user.created_at.getTime()}', '${user.updated_at.getTime()}')`;
   });
 
   await DestModel.query(`CREATE TABLE IF NOT EXISTS \`account\` (
@@ -88,7 +88,7 @@ const action = async() => {
     }
     const consumption = project.consumption || 0;
 
-    projectData[index] = `(${userId}, '${project.project_id}', ${consumption}, '${project.domain_id}', 'active', '${project.created_at}', '${project.updated_at}')`;
+    projectData[index] = `(${userId}, '${project.project_id}', ${consumption}, '${project.domain_id}', 'active', '${project.created_at.getTime()}', '${project.updated_at.getTime()}')`;
   });
 
   await DestModel.query(`CREATE TABLE IF NOT EXISTS \`project\` (

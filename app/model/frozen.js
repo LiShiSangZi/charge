@@ -51,7 +51,7 @@ module.exports = app => {
     created_at: BIGINT,
     updated_at: BIGINT,
   }, {
-    timestamps: true,
+    timestamps: false,
     freezeTableName: true,
     tableName: "frozen",
     charset: "utf8",

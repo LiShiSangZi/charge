@@ -8,7 +8,7 @@ module.exports = app => {
   /**
    * API for the products
    */
-  app.get(`/${APIVERSION}/products`, 'product.detail');
+  app.get(`/${APIVERSION}/products`, 'product.list');
   app.get(`/${APIVERSION}/products/detail`, 'product.detail');
   app.post(`/${APIVERSION}/products`, 'product.create');
   app.delete(`/${APIVERSION}/products/:product_id`, 'product.delete');

@@ -1,6 +1,10 @@
 'use strict';
 const uuidV4 = require('uuid/v4');
 
+exports.list = async (ctx) => {
+  const products = await ctx.model.Product.listAll();
+  ctx.body = products;
+}
 exports.detail = async(ctx) => {
   const products = await ctx.model.Product.listAll();
   ctx.body = {
@@ -72,7 +76,6 @@ exports.create = async(ctx) => {
 
   const cachedProjects = {};
   // For each resource. We need to create a new order for it.
-  console.log(resources[keyFields]);
   if (resources[keyFields]) {
     const orders = [];
     const deducts = [];
@@ -136,7 +139,6 @@ exports.create = async(ctx) => {
 };
 
 exports.showPrice = async(ctx) => {
-
   const billingMethod = ctx.query['purchase.billing_method'];
   let index = 0;
   const productQuery = [];
@@ -153,25 +155,35 @@ exports.showPrice = async(ctx) => {
 
   const products = await ctx.model.Product.listAll();
 
+  const qMatrix = {};
+
   const res = products.filter(prod => {
-    if (prod.unit !== billingMethod) {
+    if (billingMethod !== undefined && prod.unit !== billingMethod) {
       return false;
     }
-    const res = productQuery.find((ele) =>
+    if (productQuery.length < 1) {
+      return true;
+    }
+    const r = productQuery.find((ele) =>
       (ele.name === prod.name && ele.regionId === prod.region_id));
-    if (res) {
-      prod.total_price = prod.unit_price * res.quantity;
+    if (r) {
+      qMatrix[prod.product_id] = r.quantity;
       return true;
     }
     return false;
   }).map(prod => {
+    const q = qMatrix[prod.product_id];
+    const price = parseFloat(prod.unit_price.price.base_price);
     return {
-      "total_price": prod.total_price,
+      "total_price": price * q,
       "unit": prod.unit,
       "unit_price": prod.unit_price,
-    }
+    };
   });
-
+  if (res instanceof Array && res.length === 1) {
+    ctx.body = res[0];
+    return;
+  }
   ctx.body = res;
 };
 
