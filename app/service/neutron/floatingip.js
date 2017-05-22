@@ -27,6 +27,11 @@ module.exports = app => {
       }
       return null;
     }
+
+    async POST(opt) {
+      console.log(JSON.stringify(opt));
+      await super.POST(opt);
+    }
     
   }
   return FloatingIP;

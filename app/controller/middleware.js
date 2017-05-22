@@ -94,7 +94,7 @@ exports.catch = async(ctx) => {
     request_headers,
   } = req.body;
 
-  // console.log(req.url, request_method, request_url);
+  console.log(req.url, request_method, request_url);
 
   if (/^\/keystone/.test(req.url) && /\/auth\/tokens$/.test(request_url)) {
     ctx.body = 'Done';

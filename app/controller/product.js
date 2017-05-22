@@ -79,12 +79,10 @@ exports.create = async(ctx) => {
   if (resources[keyFields]) {
     const orders = [];
     const deducts = [];
-    const now = Date.now();
+    const now = Math.round(Date.now() / 1000);
     for (let resource of resources[keyFields]) {
       const opt = await service.generateOption(resource, module, tag, query.region);
-      console.log(opt);
       const projectId = await service.getProjectId(resource);
-      console.log(projectId);
       let projectOpt = cachedProjects[projectId];
       if (!projectOpt) {
         projectOpt = await ctx.model.Project.findProjectWithAccountById(projectId);
@@ -291,7 +289,7 @@ exports.update = async(ctx) => {
       /**
        * Create new deduct and orders and change the price.
        */
-      const now = Date.now();
+      const now = Math.round(Date.now() / 1000);
       for (let i = 0; i < newOrders.length; i++) {
         const deductId = uuidV4();
         const orderId = uuidV4();

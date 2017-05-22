@@ -11,6 +11,10 @@ module.exports = (app) => {
           case 'listeners.json':
             return 'listener';
         }
+
+        if (pathArray.length > 2 && pathArray[2] === 'restore') {
+          return 'volume';
+        }
       }
       return pathArray[0].replace(/(e*)s$/, '$1');
     }

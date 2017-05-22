@@ -37,6 +37,10 @@ module.exports = (app) => {
         let estimatePrice = option.price;
         if (order && order.length > 0) {
           estimatePrice = Math.max(0, option.price - order[0].unit_price);
+          if (estimatePrice === 0 && order[0].product_id === option.product.product_id) {
+            return;
+          }
+          // console.log(estimatePrice, order[0].product_id, option.product.product_id);
         }
         await this.freeze(estimatePrice, option.price,
           option.product.product_id, project.account.user_id, opt);
@@ -84,6 +88,7 @@ module.exports = (app) => {
       }
       if (opt.phase === 'before') {
         const option = await this.getPriceAndAmountOption(opt);
+        console.log('POST', opt, option);
         if (!option) {
           // There are no releated product for this resource.
           return;
@@ -247,7 +252,7 @@ module.exports = (app) => {
      * Parse the uuid out from a request url.
      */
     parseDeleteUUID(url) {
-      return url.replace(/\/$/, '').replace(/^(.*)\//, '').replace(/\?(.*)$/, '');
+      return url.replace(/\/$/, '').replace(/^(.*)\//, '').replace(/\?(.*)$/, '').replace(/\.json$/, '');
     }
 
     /**
@@ -255,7 +260,7 @@ module.exports = (app) => {
      * @param {*Options} opt 
      */
     parsePutUUID(opt) {
-      return opt.requestUrl.replace(/\/$/, '').replace(/^(.*)\//, '').replace(/\?(.*)$/, '');
+      return opt.requestUrl.replace(/\/$/, '').replace(/^(.*)\//, '').replace(/\?(.*)$/, '').replace(/\.json$/, '');
     }
 
     /**
