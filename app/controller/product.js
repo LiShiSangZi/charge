@@ -120,8 +120,8 @@ exports.create = async(ctx) => {
         type: attr.type,
         price: attr.unit_price,
         order_id: orderId,
-        cal_time: new Date(now),
-        start_time: new Date(now),
+        updated_at: now * 1000,
+        created_at: now * 1000,
       });
     }
 
@@ -213,8 +213,6 @@ async function closeOrders(ctx) {
     res[i] = JSON.parse(JSON.stringify(order.toJSON()));
     delete res[i]['created_at'];
     delete res[i]['updated_at'];
-    delete res[i]['cal_time'];
-    delete res[i]['start_time'];
   }
 
   await Promise.all(promises);
@@ -301,8 +299,8 @@ exports.update = async(ctx) => {
           type: order.type,
           order_id: order.order_id,
           price: order.unit_price,
-          start_time: new Date(now),
-          cal_time: new Date(now),
+          created_at: now * 1000,
+          updated_at: now * 1000,
         };
       }
 

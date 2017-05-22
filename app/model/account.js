@@ -1,5 +1,6 @@
 'use strict';
 
+const modelBase = require('../utils/model_base');
 module.exports = app => {
   const {
     STRING,
@@ -8,6 +9,7 @@ module.exports = app => {
     BOOLEAN,
     DECIMAL,
     ENUM,
+    BIGINT,
   } = app.Sequelize;
   return app.model.define('account', {
     id: {
@@ -63,10 +65,12 @@ module.exports = app => {
     frozen_balance: {
       type: DECIMAL(20, 4),
       defaultValue: 0
-    }
+    },
     /** 冻结余额。方便后期管理。 */
+    created_at: BIGINT,
+    updated_at: BIGINT,
   }, {
-    underscored: true,
+    timestamps: false,
     freezeTableName: true,
     tableName: "account",
     charset: "utf8",
@@ -118,5 +122,6 @@ module.exports = app => {
         return accountMap;
       }
     },
+    hooks: modelBase,
   });
 };

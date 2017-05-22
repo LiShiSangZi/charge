@@ -1,5 +1,6 @@
 'use strict';
 
+const modelBase = require('../utils/model_base');
 /**
  * 每次用户提交请求前，都会临时去冻结用户的资金。冻结资金会在一定时间后自动解冻。
  */
@@ -13,6 +14,7 @@ module.exports = app => {
     ENUM,
     UUID,
     UUIDV4,
+    BIGINT,
   } = app.Sequelize;
 
   return app.model.define('frozen', {
@@ -46,8 +48,10 @@ module.exports = app => {
     product_id: UUID,
     request_id: UUID,
     user_id: UUID,
+    created_at: BIGINT,
+    updated_at: BIGINT,
   }, {
-    underscored: true,
+    timestamps: true,
     freezeTableName: true,
     tableName: "frozen",
     charset: "utf8",
@@ -62,6 +66,7 @@ module.exports = app => {
           }
         });
       }
-    }
+    },
+    hooks: modelBase,
   });
 };

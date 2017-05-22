@@ -1,5 +1,6 @@
 'use strict';
 
+const modelBase = require('../utils/model_base');
 /*
 +------------+---------------+------+-----+---------+----------------+
 | Field      | Type          | Null | Key | Default | Extra          |
@@ -12,25 +13,24 @@
 | remark     | varchar(255)  | YES  |     | NULL    |                |
 | order_id   | varchar(255)  | YES  |     | NULL    |                |
 | created_at | datetime      | YES  |     | NULL    |                |
-| start_time | datetime      | YES  |     | NULL    |                |
-| cal_time   | datetime      | YES  |     | NULL    |                |
 +------------+---------------+------+-----+---------+----------------+
 */
 
 const ATTRIBUTES = [
   'id', 'deduct_id', 'money', 'order_id',
-  'created_at', 'updated_at', 'start_time', 'cal_time',
+  'created_at', 'updated_at',
 ];
 
 const QUERY_ATTR = [
   "updated_at", "remark", "created_at", "money", "price",
-  'start_time', 'cal_time',
+  'created_at', 'updated_at',
 ];
 
 module.exports = app => {
   const {
     STRING,
     INTEGER,
+    BIGINT,
     DATE,
     DECIMAL,
     ENUM,
@@ -52,10 +52,8 @@ module.exports = app => {
       unique: true
     },
     type: STRING(64),
-    start_time: DATE,
-    /** deduct开始结算的时间 */
-    cal_time: DATE,
-    /** deduct最后一次结算的时间 */
+    created_at: BIGINT,
+    updated_at: BIGINT,
     money: {
       type: DECIMAL(20, 4),
       defaultValue: 0
@@ -73,7 +71,7 @@ module.exports = app => {
       primaryKey: true
     }
   }, {
-    underscored: true,
+    timestamps: false,
     freezeTableName: true,
     tableName: "deduct",
     charset: "utf8",
@@ -102,25 +100,6 @@ module.exports = app => {
         });
       }
     },
-    hooks: {
-      beforeUpdate(instance) {
-        // console.log(instance);
-      },
-      afterFind(result) {
-        const convert = (instance) => {
-          if (!instance.start_time) {
-            instance.start_time = instance.created_at;
-          }
-          if (!instance.cal_time) {
-            instance.cal_time = instance.updated_at;
-          }
-        }
-        if (result instanceof Array) {
-          result.forEach(convert);
-        } else {
-          convert(result);
-        }
-      }
-    }
+    hooks: modelBase,
   });
 }

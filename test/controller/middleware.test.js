@@ -184,8 +184,8 @@ describe('test/controller/middleware.test.js', () => {
             type: attr.type,
             price: attr.unit_price,
             order_id: orderId,
-            cal_time: new Date(now),
-            start_time: new Date(now),
+            updated_at: now,
+            created_at: now,
           });
         }
 

@@ -39,7 +39,7 @@ module.exports = (app) => {
       const totalCharge = duration * priceInSec;
       const chMoney = totalCharge - deduct.get('money');
       deduct.set('money', parseFloat(totalCharge.toFixed(4)));
-      deduct.set('cal_time', new Date(now * 1000));
+      deduct.set('updated_at', now * 1000);
 
       this.ctx.app.model.Subscription.create({
         start_time: lastUpdate,
@@ -62,8 +62,8 @@ module.exports = (app) => {
           order_id: order.order_id,
           money: 0,
           price: order.unit_price,
-          cal_time: new Date(now * 1000),
-          start_time: new Date(now * 1000),
+          updated_at: now * 1000,
+          created_at: now * 1000,
         });
         order.deduct_id = uuid;
       }

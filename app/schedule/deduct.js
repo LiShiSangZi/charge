@@ -5,7 +5,7 @@ module.exports = app => {
     schedule: {
       interval: '30m',
       type: 'worker',
-      immediate: false,
+      immediate: true,
     },
 
     async task(ctx) {

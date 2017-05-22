@@ -1,5 +1,6 @@
 'use strict';
 
+const modelBase = require('../utils/model_base');
 module.exports = app => {
   const {
     STRING,
@@ -8,6 +9,7 @@ module.exports = app => {
     BOOLEAN,
     DECIMAL,
     ENUM,
+    BIGINT,
   } = app.Sequelize;
   return app.model.define('project', {
     id: {
@@ -31,9 +33,11 @@ module.exports = app => {
     status: {
       type: ENUM('active', 'deactive', 'deleted'),
       defaultValue: 'active'
-    }
+    },
+    created_at: BIGINT,
+    updated_at: BIGINT,
   }, {
-    underscored: true,
+    timestamps: true,
     freezeTableName: true,
     tableName: "project",
     charset: "utf8",
@@ -73,6 +77,7 @@ module.exports = app => {
           targetKey: 'user_id',
         });
       }
-    }
+    },
+    hooks: modelBase,
   });
 };

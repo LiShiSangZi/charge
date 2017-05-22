@@ -1,5 +1,6 @@
 'use strict';
 const uuidV4 = require('uuid/v4');
+const modelBase = require('../utils/model_base');
 
 const ATTRIBUTES = ['id', 'order_id', 'resource_name', 'resource_id', 'type', 'status', 'deduct_id', 'region',
   'unit_price', 'unit', 'total_price', 'user_id', 'project_id', 'domain_id',
@@ -15,6 +16,7 @@ module.exports = app => {
     ENUM,
     UUID,
     UUIDV4,
+    BIGINT,
   } = app.Sequelize;
 
   return app.model.define('order', {
@@ -73,8 +75,10 @@ module.exports = app => {
     charged: INTEGER(1),
     product_id: UUID,
     owed: INTEGER(1),
+    created_at: BIGINT,
+    updated_at: BIGINT,
   }, {
-    underscored: true,
+    timestamps: false,
     freezeTableName: true,
     tableName: "order",
     charset: "utf8",
@@ -93,8 +97,8 @@ module.exports = app => {
           type: newOrder.type,
           order_id: newOrder.order_id,
           price: newOrder.unit_price,
-          start_time: newOrder.created_at,
-          cal_time: newOrder.updated_at,
+          created_at: newOrder.created_at,
+          updated_at: newOrder.created_at,
         });
         return newOrder;
       },
@@ -147,6 +151,7 @@ module.exports = app => {
         const res = await this.findAllOrder();
         return res;
       }
-    }
+    },
+    hooks: modelBase,
   });
 };

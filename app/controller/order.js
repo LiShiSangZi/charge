@@ -53,9 +53,9 @@ exports.detail = async ctx => {
   const deduct = await ctx.app.model.Deduct.filterByOrder(orderId, limit, offset);
   const result = deduct.rows.map(row => {
     return {
-      "end_time": row.cal_time,
+      "end_time": new Date(row.updated_at),
       "remarks": row.remark,
-      "start_time": row.start_time,
+      "start_time": new Date(row.created_at),
       "total_price": row.money,
       "unit": "hour",
       "unit_price": row.price,
