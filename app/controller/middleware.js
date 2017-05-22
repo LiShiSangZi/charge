@@ -59,7 +59,7 @@ async function preOperationData(ctx, module, request_id, request_headers,
   const service = ctx.service;
   const opt = {
     "module": module,
-    "tag": pathArray[0].replace(/(e*)s$/, '$1'),
+    "tag": service.utils.tag.fetchTag(pathArray, request_url),
     "region": targetRegion,
     "catalog": catalog,
     "request": request_body,

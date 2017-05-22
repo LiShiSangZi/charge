@@ -24,7 +24,7 @@ exports.create = async(ctx) => {
     ctx.throw(400, 'You need to speicific flavor for nova server\'s product.');
   } else if (module === 'cinder') {
     if (rest.length < 1) {
-      if (tag === 'volume' || tag === 'snapshot') {
+      if (tag === 'volume') {
         ctx.throw(400, 'You need to speicific the volume type.');
       }
     }
@@ -72,12 +72,16 @@ exports.create = async(ctx) => {
 
   const cachedProjects = {};
   // For each resource. We need to create a new order for it.
+  console.log(resources[keyFields]);
   if (resources[keyFields]) {
     const orders = [];
     const deducts = [];
+    const now = Date.now();
     for (let resource of resources[keyFields]) {
       const opt = await service.generateOption(resource, module, tag, query.region);
+      console.log(opt);
       const projectId = await service.getProjectId(resource);
+      console.log(projectId);
       let projectOpt = cachedProjects[projectId];
       if (!projectOpt) {
         projectOpt = await ctx.model.Project.findProjectWithAccountById(projectId);
@@ -115,7 +119,9 @@ exports.create = async(ctx) => {
         resource_id: attr.resource_id,
         type: attr.type,
         price: attr.unit_price,
-        order_id: orderId
+        order_id: orderId,
+        cal_time: new Date(now),
+        start_time: new Date(now),
       });
     }
 
@@ -207,6 +213,8 @@ async function closeOrders(ctx) {
     res[i] = JSON.parse(JSON.stringify(order.toJSON()));
     delete res[i]['created_at'];
     delete res[i]['updated_at'];
+    delete res[i]['cal_time'];
+    delete res[i]['start_time'];
   }
 
   await Promise.all(promises);
@@ -273,6 +281,7 @@ exports.update = async(ctx) => {
       /**
        * Create new deduct and orders and change the price.
        */
+      const now = Date.now();
       for (let i = 0; i < newOrders.length; i++) {
         const deductId = uuidV4();
         const orderId = uuidV4();
@@ -292,6 +301,8 @@ exports.update = async(ctx) => {
           type: order.type,
           order_id: order.order_id,
           price: order.unit_price,
+          start_time: new Date(now),
+          cal_time: new Date(now),
         };
       }
 

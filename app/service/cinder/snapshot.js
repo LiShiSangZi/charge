@@ -33,6 +33,14 @@ module.exports = app => {
       return 1;
     }
 
+    async getProjectId(resource) {
+      return resource['os-extended-snapshot-attributes:project_id'];
+    }
+
+    formAPIQueryStr(service, tag, obj, rest) {
+      return `${obj.endpoint}/${tag}s/detail?all_tenants=1`;
+    }
+
     /**
      * Get the endpoint's name according by the option.
      * @param {*Option} opt 

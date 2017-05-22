@@ -7,7 +7,9 @@ module.exports = async(app) => {
   checkModule(app.config.chargeModule);
 
   app.beforeStart(function* () {
+
     app.model.sync();
+    app.model.Subscription.sync();
     (async() => {
       // Mock a context:
       const ctx = app.createAnonymousContext();

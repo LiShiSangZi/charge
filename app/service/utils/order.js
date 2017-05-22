@@ -15,7 +15,7 @@ module.exports = (app) => {
      * @param {Boolean} close will close the order if true.
      * @param {Boolean} createNew will create a new deduct.
      */
-    async calOrder(order, deduct, project, user, close, createNew) {
+    async calOrder(order, deduct, project, user, close, createNew, transaction) {
       const promises = [];
       let promiseIndex = 0;
       if (deduct && order.deduct_id !== deduct.deduct_id) {
@@ -31,15 +31,26 @@ module.exports = (app) => {
       }
 
       const priceInSec = order.unit_price / priceUnit;
-      const now = Date.now();
+      const now = Math.floor(Date.now() / 1000);
 
 
-      const lastUpdate = deduct.created_at.getTime();
-      const duration = Math.round((now - lastUpdate) / 1000);
-      let totalCharge = duration * priceInSec;
-      totalCharge = Math.max(totalCharge, deduct.get('money'));
+      const lastUpdate = Math.floor(deduct.created_at.getTime() / 1000);
+      const duration = now - lastUpdate;
+      const totalCharge = duration * priceInSec;
       const chMoney = totalCharge - deduct.get('money');
       deduct.set('money', parseFloat(totalCharge.toFixed(4)));
+      deduct.set('cal_time', new Date(now * 1000));
+
+      this.ctx.app.model.Subscription.create({
+        start_time: lastUpdate,
+        end_time: now,
+        total_deduct: totalCharge,
+        order_deduct: chMoney,
+        price: order.unit_price,
+        order_id: order.order_id,
+        deduct_id: deduct.deduct_id,
+      });
+
       promises[promiseIndex++] = deduct.save();
       if (createNew) {
         const uuid = uuidV4();
@@ -51,13 +62,12 @@ module.exports = (app) => {
           order_id: order.order_id,
           money: 0,
           price: order.unit_price,
+          cal_time: new Date(now * 1000),
+          start_time: new Date(now * 1000),
         });
         order.deduct_id = uuid;
       }
       order.total_price += chMoney;
-      // if (chMoney > 0) {
-      //   order.set('updated_at', now);
-      // }
 
       if (close) {
         // close the order:
@@ -85,7 +95,7 @@ module.exports = (app) => {
          * TODO: The project is no longer available. We should do something.
          */
       }
-      promises[promiseIndex++] = order.save();
+      promises[promiseIndex++] =  order.save();
       return promises;
 
     }

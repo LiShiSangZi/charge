@@ -44,6 +44,7 @@ module.exports = app => {
       if (/\/action$/.test(opt.requestUrl)) {
         const o = opt.request;
         if (o['os-extend'] && o['os-extend'].new_size) {
+          o.uuid = this.parsePutUUID(opt);
           return await super.PUT(opt);
         }
       } else if (/\/volumes$/.test(opt.requestUrl)) {
@@ -55,8 +56,18 @@ module.exports = app => {
     }
 
     async getProductName(service, tag, body, catalogs, region) {
-      const volumeType = body.volume.volume_type;
-      return `cinder:volume:${volumeType}`;
+      if (body.volume && body.volume.volume_type) {
+        const volumeType = body.volume.volume_type;
+        return `cinder:volume:${volumeType}`;
+      } else if (body.uuid) {
+        const resource = await this.getSingleResourceById(body.uuid, {
+          tag: 'volume',
+          region: region,
+          module: service,
+        });
+        let volumeType = `:${resource.volume_type}` || '';
+        return `cinder:volume${volumeType}`;
+      }
     }
 
     formAPIQueryStr(service, tag, obj, rest) {

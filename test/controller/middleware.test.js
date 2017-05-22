@@ -142,6 +142,7 @@ describe('test/controller/middleware.test.js', () => {
 
         const orders = [];
         const deducts = [];
+        const now = Date.now();
         for (let resource of resources[keyFields]) {
           const opt = await service.generateOption(resource, module, tag, query.region);
           const projectId = await service.getProjectId(resource);
@@ -182,7 +183,9 @@ describe('test/controller/middleware.test.js', () => {
             resource_id: attr.resource_id,
             type: attr.type,
             price: attr.unit_price,
-            order_id: orderId
+            order_id: orderId,
+            cal_time: new Date(now),
+            start_time: new Date(now),
           });
         }
 

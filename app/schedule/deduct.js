@@ -3,12 +3,13 @@
 module.exports = app => {
   return {
     schedule: {
-      interval: '5m',
+      interval: '30m',
       type: 'worker',
-      immediate: true,
+      immediate: false,
     },
 
     async task(ctx) {
+      console.log('Start the loop!');
       const users = await ctx.app.model.Account.listAccountMap();
 
       const projects = await ctx.app.model.Project.listProductMap();
@@ -34,8 +35,7 @@ module.exports = app => {
       // const needNewDeduct = true;
       let promises = [];
       let promiseIndex = 0;
-
-      deducts.forEach(deduct => {
+      deducts.forEach((deduct, index) => {
         const order = orders[deduct.order_id];
         if (!order || order.status === 'deleted') {
           // The order is inactive.
@@ -46,14 +46,13 @@ module.exports = app => {
           // The deduct is not current one.
           return;
         }
-
         const project = projects.get(order.project_id);
         if (!project || !project.user_id) {
           return;
         }
         const user = users.get(project.user_id);
         let newDeduct = false;
-        const original = new Date(Date.parse(deduct.created_at));
+        const original = new Date(deduct.created_at);
         if (ctx.app.config.schedule.singleOrderDuration == 'h') {
           // 按小时分deduct:
           original.setHours(original.getHours(), 0, 0, 0);
@@ -73,8 +72,9 @@ module.exports = app => {
             newDeduct = true;
           }
         }
+
         const r = ctx.service.utils.order.calOrder(order, deduct, project,
-          user, false, newDeduct, saveCurrentTimestamp);
+          user, false, newDeduct);
         promises = promises.concat(r);
         promiseIndex += r.length;
 
@@ -89,7 +89,6 @@ module.exports = app => {
       });
 
       await Promise.all(promises);
-
 
       // await deducts.save();
     }

@@ -58,9 +58,9 @@ module.exports = app => {
     },
     /** 消费总额 */
     cron_time: DATE,
-    /** 包年包月订单生效时间。 */
+    /** 包年包月订单生效时间。如果是实时订单，就是订单创建的时间。 */
     date_time: DATE,
-    /** 当前订单的到期时间。如果为包年包月订单，订单会在到期的时候失效。续订会重新生成新订单。 */
+    /** 当前订单的到期时间。如果为包年包月订单，订单会在到期的时候失效。续订会重新生成新订单。如果是实时订单，就是订单最后一次扣费的时间。 */
     renew: INTEGER(1),
     /** 用于包年包月是否自动续约。 */
     renew_method: STRING(64),
@@ -93,6 +93,8 @@ module.exports = app => {
           type: newOrder.type,
           order_id: newOrder.order_id,
           price: newOrder.unit_price,
+          start_time: newOrder.created_at,
+          cal_time: newOrder.updated_at,
         });
         return newOrder;
       },

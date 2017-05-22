@@ -34,6 +34,12 @@ exports.list = async ctx => {
   };
 };
 
+exports.getTypes = async ctx => {
+  ctx.body = {
+    types: ["running", "deleted"],
+  };
+}
+
 /**
  * Search the deduct for the order id.
  */
@@ -45,12 +51,11 @@ exports.detail = async ctx => {
   const now = Date.now();
 
   const deduct = await ctx.app.model.Deduct.filterByOrder(orderId, limit, offset);
-  
   const result = deduct.rows.map(row => {
     return {
-      "end_time": row.updated_at,
+      "end_time": row.cal_time,
       "remarks": row.remark,
-      "start_time": row.created_at,
+      "start_time": row.start_time,
       "total_price": row.money,
       "unit": "hour",
       "unit_price": row.price,

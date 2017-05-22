@@ -12,16 +12,19 @@
 | remark     | varchar(255)  | YES  |     | NULL    |                |
 | order_id   | varchar(255)  | YES  |     | NULL    |                |
 | created_at | datetime      | YES  |     | NULL    |                |
+| start_time | datetime      | YES  |     | NULL    |                |
+| cal_time   | datetime      | YES  |     | NULL    |                |
 +------------+---------------+------+-----+---------+----------------+
 */
 
 const ATTRIBUTES = [
   'id', 'deduct_id', 'money', 'order_id',
-  'created_at', 'updated_at'
+  'created_at', 'updated_at', 'start_time', 'cal_time',
 ];
 
 const QUERY_ATTR = [
-  "updated_at", "remark", "created_at", "money", "price"
+  "updated_at", "remark", "created_at", "money", "price",
+  'start_time', 'cal_time',
 ];
 
 module.exports = app => {
@@ -49,6 +52,10 @@ module.exports = app => {
       unique: true
     },
     type: STRING(64),
+    start_time: DATE,
+    /** deduct开始结算的时间 */
+    cal_time: DATE,
+    /** deduct最后一次结算的时间 */
     money: {
       type: DECIMAL(20, 4),
       defaultValue: 0
@@ -87,16 +94,32 @@ module.exports = app => {
           where: {
             order_id: orderId,
           },
-          order: [['updated_at', 'DESC']],
+          order: [
+            ['updated_at', 'DESC']
+          ],
           limit: limit,
           offset: offset,
         });
       }
     },
     hooks: {
-      beforeUpdate: function(instance) {
-
-        // console.log(instance.dataValues.created_at, instance.dataValues.updated_at);
+      beforeUpdate(instance) {
+        // console.log(instance);
+      },
+      afterFind(result) {
+        const convert = (instance) => {
+          if (!instance.start_time) {
+            instance.start_time = instance.created_at;
+          }
+          if (!instance.cal_time) {
+            instance.cal_time = instance.updated_at;
+          }
+        }
+        if (result instanceof Array) {
+          result.forEach(convert);
+        } else {
+          convert(result);
+        }
       }
     }
   });

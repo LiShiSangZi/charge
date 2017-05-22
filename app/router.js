@@ -17,6 +17,7 @@ module.exports = app => {
 
   app.get(`/${APIVERSION}/accounts/:userId`, 'account.detail');
   app.put(`/${APIVERSION}/accounts/:userId`, 'account.charge');
+  app.put(`/${APIVERSION}/accounts/:userId/level`, 'account.setLevel');
   app.get(`/${APIVERSION}/accounts`, 'account.list');
   app.post(`/${APIVERSION}/accounts`, 'account.create');
 
@@ -29,6 +30,7 @@ module.exports = app => {
    * API for the order.
    */
   app.get(`/${APIVERSION}/orders`, 'order.list');
+  app.get(`/${APIVERSION}/orders/types`, 'order.getTypes');
   app.get(`/${APIVERSION}/orders/:orderId`, 'order.detail');
   
 

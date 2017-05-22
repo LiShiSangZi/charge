@@ -11,7 +11,7 @@ module.exports = (app) => {
     }
 
     async OPTION(opt) {
-      
+
     }
 
     async PATCH(opt) {
@@ -43,6 +43,7 @@ module.exports = (app) => {
 
       } else if (opt.phase === 'after') {
         const tempOrder = await this.ctx.model.Frozen.findByRequestId(opt.requestId);
+
         if (!tempOrder) {
           return;
         }
@@ -64,6 +65,7 @@ module.exports = (app) => {
         attr.domain_id = tempOrder.domain_id;
         attr.type = tempOrder.type
         attr.product_id = tempOrder.product_id;
+        attr.user_id = tempOrder.user_id;
 
         // 解冻费用。生成order。
         await tempOrder.destroy();
@@ -158,6 +160,10 @@ module.exports = (app) => {
       }
     }
 
+    fetchTag(pathArray, request_url) {
+      return pathArray[0].replace(/(e*)s$/, '$1');
+    }
+
     /**
      * Get the price and amount information according to the option.
      * @return the object including product_id, price and amount.
@@ -167,7 +173,7 @@ module.exports = (app) => {
       const catalogs = opt.catalog;
       const body = opt.request;
       const resp = opt.response;
-      
+
       const amount = await this.getProductAmount(body, opt);
       const product = await this.getProduct(opt.module, opt.tag, region, body, catalogs);
       if (!product) {
@@ -195,6 +201,9 @@ module.exports = (app) => {
       }
       // Check if we have any order for the uuid:
       const orders = await this.ctx.model.Order.findOrderByResource(uuid, region);
+      if (!orders || orders.length < 1) {
+        return;
+      }
       let promises = [];
       let promisesIndex = 0;
       for (let i = 0; i < orders.length; i++) {
@@ -271,8 +280,7 @@ module.exports = (app) => {
       };
     }
 
-    async getResourceById(uuid, opt) {
-
+    async getSingleResourceById(uuid, opt) {
       const o = await this.getTokenAndEndpoint(opt);
       const res = await this.ctx.curl(`${o.endpoint}/${this.getTagName(opt)}/${uuid}`, {
         method: 'GET',
@@ -281,8 +289,14 @@ module.exports = (app) => {
           'Content-Type': 'application/json',
           'X-Auth-Token': o.token,
         },
+        timeout: 5000,
       });
       const resultObj = res.data[opt.tag];
+      return resultObj;
+    }
+
+    async getResourceById(uuid, opt) {
+      const resultObj = await this.getSingleResourceById(uuid, opt);
       return {
         "resource_id": resultObj.id,
         "resource_name": resultObj.name,
@@ -380,6 +394,7 @@ module.exports = (app) => {
           'Content-Type': 'application/json',
           'X-Auth-Token': obj.token,
         },
+        timeout: 20000,
       });
 
       if (res && res.data) {

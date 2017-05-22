@@ -13,6 +13,33 @@ exports.detail = async(ctx) => {
   }
 };
 
+exports.setLevel = async(ctx) => {
+  const userId = ctx.params.userId;
+  const body = ctx.request.body;
+  if (body.level) {
+    const level = parseInt(body.level, 10);
+    if (level > 0 && level < 10) {
+      if (!isNaN(level)) {
+        const res = await ctx.app.model.Account.update({
+          level: level
+        }, {
+          where: {
+            user_id: userId,
+          }
+        });
+        if (res && res.length > 0) {
+          ctx.body = {
+            "msg": "Done",
+          };
+          return;
+        }
+      }
+    }
+  }
+  ctx.throw(400, "Bad Request!");
+
+};
+
 exports.charge = async(ctx) => {
   const userId = ctx.params.userId;
   const body = ctx.request.body;
