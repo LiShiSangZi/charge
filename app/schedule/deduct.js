@@ -9,7 +9,6 @@ module.exports = app => {
     },
 
     async task(ctx) {
-      console.log('Start the loop!');
       const users = await ctx.app.model.Account.listAccountMap();
 
       const projects = await ctx.app.model.Project.listProductMap();

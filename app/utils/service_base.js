@@ -88,7 +88,6 @@ module.exports = (app) => {
       }
       if (opt.phase === 'before') {
         const option = await this.getPriceAndAmountOption(opt);
-        console.log('POST', opt, option);
         if (!option) {
           // There are no releated product for this resource.
           return;

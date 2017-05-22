@@ -10,7 +10,23 @@ module.exports = app => {
       super(ctx);
       this.tag = 'volume';
     }
-    async getProductAmount(body) {
+    async getProductAmount(body, opt) {
+      if (body.restore && body.restoreId) {
+        const o = await this.getTokenAndEndpoint(opt);
+        const res = await this.ctx.curl(`${o.endpoint}/backups/${body.restoreId}`, {
+          method: 'GET',
+          dataType: 'json',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': o.token,
+          },
+          timeout: 5000,
+        });
+        if (res.data && res.data.backup) {
+          return res.data.backup.size || 0;
+        }
+        return 0;
+      }
       if (body.volume) {
         return body.volume.size || 1;
       }
@@ -18,6 +34,16 @@ module.exports = app => {
         return body['os-extend']['new_size'] || 1;
       }
       return 1;
+    }
+
+    getResourceAttribute(req, res, tag) {
+      if (res.restore) {
+        return {
+          "resource_id": res.restore.volume_id,
+          "resource_name": res.restore.volume_name,
+        };
+      }
+      return super.getResourceAttribute(req, res, tag);
     }
 
     /**
@@ -49,6 +75,12 @@ module.exports = app => {
         }
       } else if (/\/volumes$/.test(opt.requestUrl)) {
         return await super.POST(opt);
+      } else if (/restore$/.test(opt.requestUrl)) {
+        const res = /backups\/(.*)\/restore$/.exec(opt.requestUrl);
+        if (res && res.length > 1 && opt.request.restore.volume_id === undefined) {
+          opt.request.restoreId = res[1];
+          return await super.POST(opt);
+        }
       }
     }
     async getProjectId(resource) {
@@ -56,7 +88,9 @@ module.exports = app => {
     }
 
     async getProductName(service, tag, body, catalogs, region) {
-      if (body.volume && body.volume.volume_type) {
+      if (body.restore && body.restore.type) {
+        return `cinder:volume:${body.restore.type}`;
+      } else if (body.volume && body.volume.volume_type) {
         const volumeType = body.volume.volume_type;
         return `cinder:volume:${volumeType}`;
       } else if (body.uuid) {

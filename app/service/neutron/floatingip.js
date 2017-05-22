@@ -20,19 +20,21 @@ module.exports = app => {
 
     getResourceAttribute(req, res, tag) {
       if (res) {
-        return {
-          "resource_id": res[this.tag || tag].id,
-          "resource_name": res['floating_ip_address'],
-        };
+        if (res.floatingip) {
+          return {
+            "resource_id": res.floatingip.id,
+            "resource_name": res.floatingip['floating_ip_address'],
+          };
+        } else if (res.floating_ip) {
+          return {
+            "resource_id": res.floating_ip.id,
+            "resource_name": res.floating_ip.ip,
+          };
+        }
       }
       return null;
     }
 
-    async POST(opt) {
-      console.log(JSON.stringify(opt));
-      await super.POST(opt);
-    }
-    
   }
   return FloatingIP;
 }

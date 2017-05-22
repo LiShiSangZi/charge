@@ -15,8 +15,11 @@ module.exports = (app) => {
         if (pathArray.length > 2 && pathArray[2] === 'restore') {
           return 'volume';
         }
+        if (pathArray[0] === 'floatingips.json') {
+          return 'floatingip';
+        }
       }
-      return pathArray[0].replace(/(e*)s$/, '$1');
+      return pathArray[0].replace(/(e*)s$/, '$1').replace(/\.json$/, '');
     }
   }
   return TagService;
