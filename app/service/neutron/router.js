@@ -5,15 +5,15 @@ module.exports = app => {
 
   const Base = BaseGenerator(app);
 
-  class Listener extends Base {
+  class Router extends Base {
     constructor(ctx) {
       super(ctx);
-      this.tag = 'listener';
+      this.tag = 'router';
     }
     formAPIQueryStr(service, tag, obj, rest) {
-      return `${obj.endpoint}/lbaas/${tag}s`;
+      return `${obj.endpoint}/routers`;
     }
     
   }
-  return Listener;
+  return Router;
 }

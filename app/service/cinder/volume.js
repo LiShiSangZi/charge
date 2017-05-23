@@ -66,6 +66,10 @@ module.exports = app => {
       return url;
     }
 
+    async DELETE(opt) {
+      return await super.DELETE(opt);
+    }
+
     async POST(opt) {
       if (/\/action$/.test(opt.requestUrl)) {
         const o = opt.request;
@@ -74,7 +78,9 @@ module.exports = app => {
           return await super.PUT(opt);
         }
       } else if (/\/volumes$/.test(opt.requestUrl)) {
-        return await super.POST(opt);
+        if (opt.request['os-detach'] === undefined && opt.request['os-attach'] === undefined) {
+          return await super.POST(opt);
+        }
       } else if (/restore$/.test(opt.requestUrl)) {
         const res = /backups\/(.*)\/restore$/.exec(opt.requestUrl);
         if (res && res.length > 1 && opt.request.restore.volume_id === undefined) {

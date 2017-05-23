@@ -276,7 +276,11 @@ module.exports = (app) => {
 
     async getTokenAndEndpoint(opt) {
       const tokenObj = await this.ctx.service.token.getToken();
-      const endpoint = tokenObj.endpoint[this.getModuleName(opt)][opt.region || 'RegionOne'];
+      const module = this.getModuleName(opt);
+      if (!tokenObj.endpoint[module]) {
+        throw new Error('The module name is invalid!');
+      }
+      const endpoint = tokenObj.endpoint[module][opt.region || 'RegionOne'];
 
       return {
         "token": tokenObj.token,
@@ -390,7 +394,10 @@ module.exports = (app) => {
       };
 
       const obj = await this.getTokenAndEndpoint(o);
-
+      if (!obj || !obj.endpoint) {
+        throw new Error('The region is invalid or the module is invalid!');
+      }
+      // console.log(this.formAPIQueryStr(service, tag, obj, rest), obj.token);
       const res = await this.ctx.curl(this.formAPIQueryStr(service, tag, obj, rest), {
         method: 'GET',
         dataType: 'json',
