@@ -93,7 +93,8 @@ module.exports = app => {
             order_id: orderId,
           },
           order: [
-            ['updated_at', 'DESC']
+            ['updated_at', 'DESC'],
+            ['created_at', 'DESC'],
           ],
           limit: limit,
           offset: offset,

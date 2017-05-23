@@ -38,6 +38,9 @@ module.exports = (app) => {
       const duration = now - lastUpdate;
       const totalCharge = duration * priceInSec;
       const chMoney = totalCharge - deduct.get('money');
+      if (chMoney < 0) {
+        chMoney = 0;
+      }
       deduct.set('money', parseFloat(totalCharge.toFixed(4)));
       deduct.set('updated_at', now * 1000);
 
