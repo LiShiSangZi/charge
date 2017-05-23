@@ -100,7 +100,7 @@ describe('test/controller/middleware.test.js', () => {
         continue;
       } else if (module === 'cinder') {
         if (rest.length < 1) {
-          if (tag === 'volume' || tag === 'snapshot') {
+          if (tag === 'volume') {
             console.log('You need to speicific the volume type.');
             continue;
           }
