@@ -1,14 +1,15 @@
 'use strict';
 
 module.exports = app => {
+  const triggerMin = app.config.schedule.triggerMin || 0;
   return {
     schedule: {
-      interval: '30m',
+      cron: `0 ${triggerMin} * * * *`,
       type: 'worker',
-      immediate: true,
     },
 
     async task(ctx) {
+      console.log(new Date(), 'Start');
       const users = await ctx.app.model.Account.listAccountMap();
 
       const projects = await ctx.app.model.Project.listProductMap();
@@ -89,7 +90,15 @@ module.exports = app => {
 
       await Promise.all(promises);
 
-      // await deducts.save();
+      // Remove the frozen data more than an hour.
+      const critical = Date.now() - 3600000;
+      await ctx.app.model.Frozen.destroy({
+        where: {
+          updated_at: {
+            $lt: critical,
+          },
+        },
+      });
     }
   }
 }

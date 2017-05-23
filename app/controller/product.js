@@ -173,7 +173,7 @@ exports.showPrice = async(ctx) => {
     const q = qMatrix[prod.product_id];
     const price = parseFloat(prod.unit_price.price.base_price);
     return {
-      "total_price": price * q,
+      "total_price": ctx.service.price.calculatePrice(prod.unit_price, q),
       "unit": prod.unit,
       "unit_price": prod.unit_price,
     };
