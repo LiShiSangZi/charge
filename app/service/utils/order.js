@@ -55,6 +55,7 @@ module.exports = (app) => {
       if (createNew) {
         const uuid = uuidV4();
         // Create a new empty deduct.
+        // console.trace('Create new deduct!', new Date(now * 1000));
         promises[promiseIndex++] = this.ctx.app.model.Deduct.create({
           deduct_id: uuid,
           resource_id: order.resource_id,

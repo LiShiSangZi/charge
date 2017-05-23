@@ -108,7 +108,7 @@ async function closeOrders(ctx) {
 
   const params = ctx.params;
   const orders = await ctx.model.Order.findOrderByProductId(params.product_id);
-  console.log(orders);
+  
   ctx.body = {};
 
   let promises = [];

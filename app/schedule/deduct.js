@@ -4,12 +4,14 @@ module.exports = app => {
   const triggerMin = app.config.schedule.triggerMin || 0;
   return {
     schedule: {
-      cron: `0 ${triggerMin} * * * *`,
+      cron: `${triggerMin} * * * *`,
+      // cron: `* * * * *`,
       type: 'worker',
     },
 
     async task(ctx) {
-      console.log(new Date(), 'Start');
+      const nowNum = Date.now();
+      console.log(new Date(nowNum), 'Start');
       const users = await ctx.app.model.Account.listAccountMap();
 
       const projects = await ctx.app.model.Project.listProductMap();
@@ -99,6 +101,8 @@ module.exports = app => {
           },
         },
       });
+
+      console.log(new Date(nowNum), Date.now() - nowNum);
     }
   }
 }

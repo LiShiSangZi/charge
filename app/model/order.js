@@ -103,7 +103,6 @@ module.exports = app => {
         return newOrder;
       },
       async findOrderByProductId(uuid) {
-        console.log(`findOrderByProductId`, uuid);
         return await this.findAll({
           where: {
             product_id: uuid,
