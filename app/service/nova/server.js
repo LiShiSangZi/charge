@@ -55,6 +55,18 @@ module.exports = app => {
       }
       return await super.POST(opt);
     }
+
+    async DELETE(opt) {
+
+      const req = opt.requestUrl.replace(/^(.*?)servers\/[0-9,a-z,-]+/, '').replace(/^\//, '');
+      const reqData = req.split('/');
+
+      if (reqData.length > 1) {
+        return;
+      }
+
+      return await super.DELETE(opt);
+    }
   }
   return Server;
 }
