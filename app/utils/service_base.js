@@ -23,6 +23,7 @@ module.exports = (app) => {
      * @param {*Options} opt 
      */
     async PUT(opt) {
+      console.log('PUT");');
       if (opt.phase === 'before') {
         const option = await this.getPriceAndAmountOption(opt);
         if (!option) {
@@ -128,7 +129,6 @@ module.exports = (app) => {
     async DELETE(opt) {
       const region = opt.region;
       const uuid = this.parseDeleteUUID(opt.requestUrl);
-
       await this.closeOrder(uuid, region);
     }
 
@@ -397,7 +397,7 @@ module.exports = (app) => {
       if (!obj || !obj.endpoint) {
         throw new Error('The region is invalid or the module is invalid!');
       }
-      // console.log(this.formAPIQueryStr(service, tag, obj, rest), obj.token);
+      
       const res = await this.ctx.curl(this.formAPIQueryStr(service, tag, obj, rest), {
         method: 'GET',
         dataType: 'json',

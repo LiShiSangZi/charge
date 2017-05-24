@@ -41,7 +41,7 @@ async function preOperationData(ctx, module, request_id, request_headers,
     const endpoints = endpoint.endpoints;
     let found = false;
     endpoints.some(e => {
-      const url = new RegExp(e.publicURL.replace(/\/v(\d+)(\.\d+)*\//, '/v(.+)/'));
+      const url = new RegExp(e.publicURL.replace(/\/v(\d+)(\.\d+)*(\/)*/, '/v(\\d|\\.)*$3'));
       if (url.test(request_url)) {
         targetUrl = url;
         targetRegion = e.region;
@@ -52,6 +52,7 @@ async function preOperationData(ctx, module, request_id, request_headers,
     });
     return found;
   });
+
   const pathArray = targetPath.split('/').map(k => k.replace(/^(.*)\-/g, ''));
   if (pathArray.length > 0 && /v(\d)/.test(pathArray[0])) {
     pathArray.shift();
@@ -108,6 +109,8 @@ exports.catch = async(ctx) => {
   } catch (e) {
 
   }
+
+  
 
   try {
     response_body = JSON.parse(response_body);

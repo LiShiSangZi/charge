@@ -36,6 +36,7 @@ exports.create = async(ctx) => {
   const productId = uuidV4();
   body.product_id = productId;
   const resources = await buildOrders(ctx, body, module, tag, rest);
+  let instance;
   const keyFields = `${tag}s`;
   if (resources && resources[keyFields]) {
     instance = await ctx.model.Product.create({

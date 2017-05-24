@@ -71,6 +71,8 @@ module.exports = app => {
             if (endpoint.interface === 'public') {
               if (name === 'neutron' && !/\/2.0/.test(endpoint.url)) {
                 catalog[name][endpoint.region_id] = `${endpoint.url}/v2.0`
+              } else if (name === 'glance' && !/\/v2/.test(endpoint.url)) {
+                catalog[name][endpoint.region_id] = `${endpoint.url}/v2`
               } else {
                 catalog[name][endpoint.region_id] = endpoint.url;
               }
@@ -94,6 +96,14 @@ module.exports = app => {
             Object.keys(endpoint).forEach(key => {
               if (/URL$/.test(key)) {
                 endpoint[key] = `${endpoint[key]}/v2.0`;
+              }
+            });
+          })
+        } else if (catalog.name === 'glance') {
+          catalog.endpoints.forEach(endpoint => {
+            Object.keys(endpoint).forEach(key => {
+              if (/URL$/.test(key)) {
+                endpoint[key] = `${endpoint[key]}/v2`;
               }
             });
           })

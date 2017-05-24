@@ -181,6 +181,34 @@ module.exports = app => {
       });
       return res.data;
     }
+
+    async fetchAssignments(region) {
+      const tokenObj = await this.ctx.service.token.getToken();
+      const endpoint = tokenObj.endpoint['keystone'][region || 'RegionOne'];
+      const res = await this.ctx.curl(`${endpoint}/role_assignments`, {
+        method: 'GET',
+        dataType: 'json',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth-Token': tokenObj.token,
+        },
+      });
+      return res.data;
+    }
+
+    async fetchProjects(region) {
+      const tokenObj = await this.ctx.service.token.getToken();
+      const endpoint = tokenObj.endpoint['keystone'][region || 'RegionOne'];
+      const res = await this.ctx.curl(`${endpoint}/projects`, {
+        method: 'GET',
+        dataType: 'json',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth-Token': tokenObj.token,
+        },
+      });
+      return res.data;
+    }
   }
   return Server;
 }
