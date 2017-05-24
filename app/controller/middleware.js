@@ -2,7 +2,7 @@
 
 async function preOperationData(ctx, module, request_id, request_headers,
   request_method, request_url, request_body, response_status,
-  response_body, phase) {
+  response_body, phase, status_code) {
   const userId = request_headers['X-User-Id'];
   const projectId = request_headers['X-Project-Id'];
   const domainId = request_headers['X-Project-Domain-Id'];
@@ -73,8 +73,9 @@ async function preOperationData(ctx, module, request_id, request_headers,
     "requestId": request_id,
     "responseStatus": response_status,
     "phase": phase,
+    "statusCode": status_code,
   };
-  
+
   if (service && service[module] && service[module][opt.tag]) {
     const res = await ctx.service[module][opt.tag][request_method](opt);
   } else if (service && service[module] && typeof ctx.service[module][request_method] === 'function') {
@@ -110,7 +111,7 @@ exports.catch = async(ctx) => {
 
   }
 
-  
+
 
   try {
     response_body = JSON.parse(response_body);
@@ -127,10 +128,8 @@ exports.catch = async(ctx) => {
   const module = ctx.params.module;
   if (o.response_status) {
     const statusCode = parseInt(o.response_status, 10);
-    if (statusCode < 400) {
-      await preOperationData(ctx, module, request_id, request_headers,
-        request_method, request_url, request_body, response_status, response_body, 'after');
-    }
+    await preOperationData(ctx, module, request_id, request_headers,
+      request_method, request_url, request_body, response_status, response_body, 'after', statusCode);
   } else {
     await preOperationData(ctx, module, request_id, request_headers,
       request_method, request_url, request_body, response_status, response_body, 'before');

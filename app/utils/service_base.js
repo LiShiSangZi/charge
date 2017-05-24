@@ -23,7 +23,6 @@ module.exports = (app) => {
      * @param {*Options} opt 
      */
     async PUT(opt) {
-      console.log('PUT");');
       if (opt.phase === 'before') {
         const option = await this.getPriceAndAmountOption(opt);
         if (!option) {
@@ -50,6 +49,11 @@ module.exports = (app) => {
         const tempOrder = await this.ctx.model.Frozen.findByRequestId(opt.requestId);
 
         if (!tempOrder) {
+          return;
+        }
+
+        if (opt.statusCode >= 400) {
+          await tempOrder.destroy();
           return;
         }
 
@@ -108,6 +112,12 @@ module.exports = (app) => {
           // No frozen data found. Because the resource does not require charge.
           return;
         }
+        
+        if (opt.statusCode >= 400) {
+          await tempOrder.destroy();
+          return;
+        }
+
         const body = opt.request;
         const resp = opt.response;
         let attr = this.getResourceAttribute(body, resp, opt.tag);
