@@ -71,6 +71,17 @@ exports.charge = async(ctx) => {
     } else {
       account.balance += addValue;
     }
+
+    if (query.operator) {
+      if (account.reward_value === null) {
+        account.reward_value = addValue;
+      } else {
+        account.reward_value += addValue;
+      }
+      if (account.reward_value < 0) {
+        account.reward_value = 0;
+      }
+    }
     account.save();
   }
   ctx.body = {

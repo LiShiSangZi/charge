@@ -56,7 +56,6 @@ module.exports = app => {
     /** 用户充值的金额 */
     reward_value: {
       type: DECIMAL(20, 4),
-      defaultValue: 0
     },
     /** 赠送余额。所有非充值流入的资金。用户无法提现。 */
     sales_id: UUID,
