@@ -6,6 +6,9 @@ exports.detail = async(ctx) => {
   const account = await ctx.app.model.Account.getAccountById(userId);
   account.balance = account.balance.toFixed(4);
   account.consumption = account.consumption.toFixed(4);
+  if (account.reward_value) {
+    account.reward_value = account.reward_value.toFixed(4);
+  }
   if (!account) {
     ctx.throw(404);
   } else {
