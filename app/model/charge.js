@@ -3,9 +3,10 @@
 /**
  * Charge model for the user or system.
  */
-'use strict';
 
-const modelBase = require('../utils/model_base');
+const ModelBase = require('../utils/model_base');
+
+const hooks = new ModelBase();
 /**
  * 每次用户提交请求前，都会临时去冻结用户的资金。冻结资金会在一定时间后自动解冻。
  */
@@ -73,6 +74,6 @@ module.exports = app => {
         });
       }
     },
-    hooks: modelBase,
+    hooks: hooks.toJSON(),
   });
 };

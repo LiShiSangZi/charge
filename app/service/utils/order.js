@@ -44,21 +44,10 @@ module.exports = (app) => {
       deduct.set('money', parseFloat(totalCharge.toFixed(4)));
       deduct.set('updated_at', now * 1000);
 
-      this.ctx.app.model.Subscription.create({
-        start_time: lastUpdate,
-        end_time: now,
-        total_deduct: totalCharge,
-        order_deduct: chMoney,
-        price: order.unit_price,
-        order_id: order.order_id,
-        deduct_id: deduct.deduct_id,
-      });
-
       promises[promiseIndex++] = deduct.save();
       if (createNew) {
         const uuid = uuidV4();
         // Create a new empty deduct.
-        // console.trace('Create new deduct!', new Date(now * 1000));
         promises[promiseIndex++] = this.ctx.app.model.Deduct.create({
           deduct_id: uuid,
           resource_id: order.resource_id,

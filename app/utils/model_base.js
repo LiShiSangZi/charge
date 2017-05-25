@@ -44,26 +44,40 @@ const readData = (instance) => {
 /**
  * Handle bug that sequlize have timestamp issue.
  */
-module.exports = {
-  beforeBulkCreate: (instance, options) => {
+
+class HookBase {
+  beforeBulkCreate(instance) {
     writeData(instance, true);
-  },
-  beforeBulkUpdate: (options) => {
-    // TODO: Add me.
-  },
-  beforeCreate: (instance) => {
+  }
+  beforeBulkUpdate(options) {
+    // TODO: Add me here.
+  }
+  beforeCreate(instance) {
     writeData(instance, true);
-  },
-  beforeUpdate: (instance) => {
+  }
+  beforeUpdate(instance) {
     writeData(instance);
-  },
-  beforeSave: (instance) => {
+  }
+  beforeSave(instance) {
     writeData(instance);
-  },
-  beforeUpsert: (values) => {
+  }
+  beforeUpsert(values) {
     // TODO: Add me.
-  },
-  afterFind: (instance) => {
+  }
+  afterFind(instance) {
     readData(instance);
   }
+  toJSON() {
+    const fields = ['beforeBulkCreate', 'beforeBulkUpdate', 'beforeCreate',
+      'beforeUpdate', 'beforeSave', 'beforeUpsert', 'afterFind'
+    ];
+
+    const result = {};
+    fields.forEach(key => {
+      result[key] = this.__proto__[key];
+    });
+    return result;
+  }
 }
+
+module.exports = HookBase;

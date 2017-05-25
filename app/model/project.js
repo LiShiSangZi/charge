@@ -1,6 +1,9 @@
 'use strict';
 
-const modelBase = require('../utils/model_base');
+const ModelBase = require('../utils/model_base');
+
+const hooks = new ModelBase();
+
 module.exports = app => {
   const {
     STRING,
@@ -78,6 +81,6 @@ module.exports = app => {
         });
       }
     },
-    hooks: modelBase,
+    hooks: hooks.toJSON(),
   });
 };

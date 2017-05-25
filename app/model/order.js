@@ -1,6 +1,8 @@
 'use strict';
 const uuidV4 = require('uuid/v4');
-const modelBase = require('../utils/model_base');
+const ModelBase = require('../utils/model_base');
+
+
 
 const ATTRIBUTES = ['id', 'order_id', 'resource_name', 'resource_id', 'type', 'status', 'deduct_id', 'region',
   'unit_price', 'unit', 'total_price', 'user_id', 'project_id', 'domain_id',
@@ -18,6 +20,53 @@ module.exports = app => {
     UUIDV4,
     BIGINT,
   } = app.Sequelize;
+
+
+  const writeData = (ins) => {
+    const travelInstance = (instance) => {
+      if (instance._changed) {
+        const attr = {};
+        let changed = false;
+        Object.keys(instance._changed).forEach(key => {
+          if (key == 'total_price') {
+            return;
+          }
+          changed = true;
+          attr[key] = instance.dataValues[key];
+        });
+        if (changed) {
+          app.model.Snapshot.create(attr).then(r => {
+          });
+        }
+      }
+    }
+    if (ins instanceof Array) {
+      ins.forEach(travelInstance);
+    } else {
+      travelInstance(ins);
+    }
+  };
+
+  class OrderModel extends ModelBase {
+    beforeBulkCreate(instance) {
+      super.beforeBulkCreate(instance);
+      writeData(instance);
+    }
+    beforeCreate(instance) {
+      super.beforeCreate(instance);
+      writeData(instance);
+    }
+    beforeUpdate(instance) {
+      super.beforeUpdate(instance);
+      writeData(instance);
+    }
+    beforeSave(instance) {
+      super.beforeSave(instance);
+      writeData(instance);
+    }
+  }
+
+  const hooks = new OrderModel();
 
   return app.model.define('order', {
     id: {
@@ -152,6 +201,6 @@ module.exports = app => {
         return res;
       }
     },
-    hooks: modelBase,
+    hooks: hooks.toJSON(),
   });
 };

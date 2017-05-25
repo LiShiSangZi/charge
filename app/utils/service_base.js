@@ -112,7 +112,7 @@ module.exports = (app) => {
           // No frozen data found. Because the resource does not require charge.
           return;
         }
-        
+
         if (opt.statusCode >= 400) {
           await tempOrder.destroy();
           return;
@@ -323,10 +323,14 @@ module.exports = (app) => {
 
     getResourceAttribute(req, res, tag) {
       if (res) {
-        return {
+        const o = {
           "resource_id": res[this.tag || tag].id,
           "resource_name": res[this.tag || tag].name,
         };
+        if (!o.resource_name) {
+          o.resource_name = req[this.tag || tag].name;
+        }
+        return o;
       }
       return null;
     }
@@ -407,7 +411,7 @@ module.exports = (app) => {
       if (!obj || !obj.endpoint) {
         throw new Error('The region is invalid or the module is invalid!');
       }
-      
+
       const res = await this.ctx.curl(this.formAPIQueryStr(service, tag, obj, rest), {
         method: 'GET',
         dataType: 'json',

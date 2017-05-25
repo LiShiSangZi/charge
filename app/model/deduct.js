@@ -1,6 +1,8 @@
 'use strict';
 
-const modelBase = require('../utils/model_base');
+const ModelBase = require('../utils/model_base');
+
+const hooks = new ModelBase();
 /*
 +------------+---------------+------+-----+---------+----------------+
 | Field      | Type          | Null | Key | Default | Extra          |
@@ -101,6 +103,6 @@ module.exports = app => {
         });
       }
     },
-    hooks: modelBase,
+    hooks: hooks.toJSON(),
   });
 }
