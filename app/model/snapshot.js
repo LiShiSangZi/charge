@@ -18,6 +18,7 @@ module.exports = app => {
     UUID,
     UUIDV4,
     BIGINT,
+    BOOLEAN,
   } = app.Sequelize;
 
   return app.model.define('snapshot', {
@@ -56,6 +57,10 @@ module.exports = app => {
     project_id: UUID,
     domain_id: STRING(255),
     product_id: UUID,
+    created: {
+      type: BOOLEAN,
+      defaultValue: false,
+    },
     created_at: BIGINT,
     updated_at: BIGINT,
   }, {

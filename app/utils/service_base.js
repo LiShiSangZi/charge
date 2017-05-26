@@ -42,6 +42,7 @@ module.exports = (app) => {
           }
           // console.log(estimatePrice, order[0].product_id, option.product.product_id);
         }
+        await this.checkBalance(project, estimatePrice);
         await this.freeze(estimatePrice, option.price,
           option.product.product_id, project.account.user_id, opt);
 
@@ -103,6 +104,8 @@ module.exports = (app) => {
           // FIXME: Throw an error for this.
           return;
         }
+        await this.checkBalance(project, option.price);
+
         await this.freeze(option.price, option.price,
           option.product.product_id, project.account.user_id, opt);
 
@@ -149,6 +152,47 @@ module.exports = (app) => {
      */
     async GET(opt) {
       // await this.getProduct(region, body, catalogs);
+    }
+
+    async checkBalance(project, estimatePrice) {
+
+      const account = project.account;
+      if (account.level < 9 && app.config.enableCheckBalance) {
+        const balanceObj = await this.ctx.model.Setting.getSetting('prevent.balance');
+        let minBalance = 0;
+        if (balanceObj) {
+          minBalance = balanceObj.value || 0;
+          if (minBalance < 0) {
+            minBalance = 0;
+          }
+        }
+        let total = await this.ctx.model.Frozen.sum('total_price', {
+          where: {
+            "user_id": account.user_id,
+          }
+        });
+
+        if (isNaN(total)) {
+          total = 0;
+        }
+
+        const balance = account.balance - total;
+
+        if (balance - estimatePrice - minBalance < 0) {
+          throw new Error("out_of_balance");
+          // this.ctx.status = 409;
+          // this.ctx.body = 'Out of Balance';
+          // this.ctx.app.emit('error', {
+          //   "message": "Your balance is not enough for the resource."
+          // }, ctx);
+          // this.ctx.throw(409, {
+          //   "message": "out_of_balance",
+          //   "code": 409,
+          //   "title": "Out of Balance",
+          // });
+        }
+      }
+
     }
 
     /**
@@ -327,7 +371,7 @@ module.exports = (app) => {
           "resource_id": res[this.tag || tag].id,
           "resource_name": res[this.tag || tag].name,
         };
-        if (!o.resource_name) {
+        if (!o.resource_name && req[this.tag || tag]) {
           o.resource_name = req[this.tag || tag].name;
         }
         return o;

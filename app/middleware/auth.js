@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Fetch the userId according to the token. If the token is not spec, will throw 401.
+ * Fetch the us1erId according to the token. If the token is not spec, will throw 401.
  */
 
 module.exports = options => {

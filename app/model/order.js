@@ -22,7 +22,7 @@ module.exports = app => {
   } = app.Sequelize;
 
 
-  const writeData = (ins) => {
+  const writeData = (ins, created) => {
     const travelInstance = (instance) => {
       if (instance._changed) {
         const attr = {};
@@ -35,6 +35,7 @@ module.exports = app => {
           attr[key] = instance.dataValues[key];
         });
         if (changed) {
+          attr.created = created === true;
           app.model.Snapshot.create(attr).then(r => {
           });
         }

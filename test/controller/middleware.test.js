@@ -30,53 +30,53 @@ describe('test/controller/middleware.test.js', () => {
 
   it('process the migrate of the order', async() => {
 
-    console.log('Initilize the table...');
-    await app.model.sync();
-    await app.model.Account.sync();
-    await app.model.Project.sync();
+    // console.log('Initilize the table...');
+    // await app.model.sync();
+    // await app.model.Account.sync();
+    // await app.model.Project.sync();
 
-    console.log('Fetch the account and project from gringotts...');
-    const users = await SourceModel.query('SELECT * FROM account, keystone.user where keystone.user.id = account.user_id', {
-      type: Sequelize.QueryTypes.SELECT
-    });
+    // console.log('Fetch the account and project from gringotts...');
+    // const users = await SourceModel.query('SELECT * FROM account, keystone.user where keystone.user.id = account.user_id', {
+    //   type: Sequelize.QueryTypes.SELECT
+    // });
 
-    const projects = await SourceModel.query('select * from project, keystone.project where project.project_id = keystone.project.id', {
-      type: Sequelize.QueryTypes.SELECT
-    });
+    // const projects = await SourceModel.query('select * from project, keystone.project where project.project_id = keystone.project.id', {
+    //   type: Sequelize.QueryTypes.SELECT
+    // });
 
-    const userMap = new Map();
+    // const userMap = new Map();
 
-    const userData = [];
-    users.forEach((user, index) => {
-      userMap.set(user.user_id, user);
-      let status = 'active';
-      if (user.deleted !== 0) {
-        status = 'deleted';
-      }
-      const consumption = user.consumption || 0;
-      userData[index] = `('${user.user_id}', ${user.balance}, ${consumption}, 'CNY', ${user.level}, ${user.owed}, '${user.domain_id}', '', 0, 0, '', '${status}', ${user.frozen_balance}, '${user.created_at}', '${user.updated_at}')`;
-    });
+    // const userData = [];
+    // users.forEach((user, index) => {
+    //   userMap.set(user.user_id, user);
+    //   let status = 'active';
+    //   if (user.deleted !== 0) {
+    //     status = 'deleted';
+    //   }
+    //   const consumption = user.consumption || 0;
+    //   userData[index] = `('${user.user_id}', ${user.balance}, ${consumption}, 'CNY', ${user.level}, ${user.owed}, '${user.domain_id}', '', 0, 0, '', '${status}', ${user.frozen_balance}, '${user.created_at}', '${user.updated_at}')`;
+    // });
 
-    console.log('Save account...');
+    // console.log('Save account...');
 
-    await DestModel.query(`INSERT INTO account (user_id, balance, consumption, currency, level, owed, domain_id, inviter, charged, reward_value, sales_id, status, frozen_balance, created_at, updated_at) VALUES ${userData.join(',')}`);
+    // await DestModel.query(`INSERT INTO account (user_id, balance, consumption, currency, level, owed, domain_id, inviter, charged, reward_value, sales_id, status, frozen_balance, created_at, updated_at) VALUES ${userData.join(',')}`);
 
-    const projectData = [];
-    projects.forEach((project, index) => {
-      let userId = project.user_id;
+    // const projectData = [];
+    // projects.forEach((project, index) => {
+    //   let userId = project.user_id;
 
-      if (!userId || userMap.get(userId) === undefined) {
-        userId = null;
-      } else {
-        userId = `'${userId}'`;
-      }
-      const consumption = project.consumption || 0;
+    //   if (!userId || userMap.get(userId) === undefined) {
+    //     userId = null;
+    //   } else {
+    //     userId = `'${userId}'`;
+    //   }
+    //   const consumption = project.consumption || 0;
 
-      projectData[index] = `(${userId}, '${project.project_id}', ${consumption}, '${project.domain_id}', 'active', '${project.created_at}', '${project.updated_at}')`;
-    });
+    //   projectData[index] = `(${userId}, '${project.project_id}', ${consumption}, '${project.domain_id}', 'active', '${project.created_at}', '${project.updated_at}')`;
+    // });
 
-    console.log('Save project...');
-    await DestModel.query(`INSERT INTO project (user_id, project_id, consumption, domain_id, status, created_at, updated_at) VALUES ${projectData.join(', ')}`);
+    // console.log('Save project...');
+    // await DestModel.query(`INSERT INTO project (user_id, project_id, consumption, domain_id, status, created_at, updated_at) VALUES ${projectData.join(', ')}`);
 
 
 
@@ -87,6 +87,10 @@ describe('test/controller/middleware.test.js', () => {
     const ctx = app.mockContext();
     for (let i = 0; i < products.length; i++) {
       const product = products[i];
+      console.log(product.name, product.product_id);
+      if (product.product_id !== '483555ce-799b-4d5e-9228-d463abef51ca') {
+        continue;
+      }
 
 
       const [module, tag, ...rest] = product.name.split(':');
@@ -190,11 +194,11 @@ describe('test/controller/middleware.test.js', () => {
             created_at: now,
           });
         }
+        console.log(orders);
+        // const p1 = ctx.model.Order.bulkCreate(orders);
+        // const p2 = ctx.model.Deduct.bulkCreate(deducts);
 
-        const p1 = ctx.model.Order.bulkCreate(orders);
-        const p2 = ctx.model.Deduct.bulkCreate(deducts);
-
-        await Promise.all([p1, p2]);
+        // await Promise.all([p1, p2]);
       }
 
     }

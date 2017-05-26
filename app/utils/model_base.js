@@ -61,8 +61,8 @@ class HookBase {
   beforeSave(instance) {
     writeData(instance);
   }
-  beforeUpsert(values) {
-    // TODO: Add me.
+  beforeUpsert(...args) {
+    // TODO: Add me. The sequelize v3 does not support this hook.
   }
   afterFind(instance) {
     readData(instance);
