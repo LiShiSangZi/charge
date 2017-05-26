@@ -12,7 +12,6 @@ module.exports = app => {
     }
 
     async getProductAmount(body, opt) {
-
       if (body.snapshot) {
         const volumeId = body.snapshot.volume_id;
         if (volumeId) {
@@ -29,6 +28,9 @@ module.exports = app => {
             return res.data.volume.size;
           }
         }
+      }
+      if (opt.response && opt.response.snapshot) {
+        return opt.response.snapshot.size || 1;
       }
       return 1;
     }

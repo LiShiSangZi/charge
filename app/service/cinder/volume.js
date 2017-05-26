@@ -33,6 +33,9 @@ module.exports = app => {
       if (body['os-extend']) {
         return body['os-extend']['new_size'] || 1;
       }
+      if (opt && opt.response && opt.response.volume) {
+        return opt.response.volume.size || 1;
+      }
       return 1;
     }
 
