@@ -264,6 +264,9 @@ module.exports = (app) => {
       }
       let promises = [];
       let promisesIndex = 0;
+
+      const projects = {};
+      const users = {};
       for (let i = 0; i < orders.length; i++) {
         const order = orders[i];
         if (order.deduct_id) {
@@ -286,9 +289,24 @@ module.exports = (app) => {
             });
           }
           // Calculate the order's charge and close it.
-          this.ctx.service.utils.order.calOrder(order, deduct, project, user, true);
+          const newPromise = this.ctx.service.utils.order.calOrder(order, 
+            deduct, project, user, true);
+          promises = promises.concat(newPromise);
+          promisesIndex += newPromise.length;
+          projects[project.project_id] = project;
+          users[user.user_id] = user;
         }
       }
+
+      Object.keys(projects).forEach(k => {
+        const project = projects[k];
+        promises[promisesIndex++] = project.save();
+      });
+
+      Object.keys(users).forEach(k => {
+        const user = users[k];
+        promises[promisesIndex++] = user.save();
+      });
 
       await Promise.all(promises);
     }

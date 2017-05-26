@@ -109,12 +109,14 @@ async function closeOrders(ctx) {
 
   const params = ctx.params;
   const orders = await ctx.model.Order.findOrderByProductId(params.product_id);
-  
+
   ctx.body = {};
 
   let promises = [];
   let promisesIndex = 0;
   const res = [];
+  const projects = {};
+  const users = {};
   for (let i = 0; i < orders.length; i++) {
     const order = orders[i];
     if (order.deduct_id) {
@@ -136,9 +138,22 @@ async function closeOrders(ctx) {
           }
         });
       }
+      projects[project.project_id] = project;
+      users[user.user_id] = user;
       // Calculate the order's charge and close it.
       promises = promises.concat(ctx.service.utils.order.calOrder(order, deduct, project, user, true));
     }
+
+
+    Object.keys(projects).forEach(k => {
+      const project = projects[k];
+      promises[promisesIndex++] = project.save();
+    });
+
+    Object.keys(users).forEach(k => {
+      const user = users[k];
+      promises[promisesIndex++] = user.save();
+    });
 
     res[i] = JSON.parse(JSON.stringify(order.toJSON()));
     delete res[i]['created_at'];
