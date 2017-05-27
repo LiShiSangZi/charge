@@ -473,7 +473,6 @@ module.exports = (app) => {
       if (!obj || !obj.endpoint) {
         throw new Error('The region is invalid or the module is invalid!');
       }
-
       const res = await this.ctx.curl(this.formAPIQueryStr(service, tag, obj, rest), {
         method: 'GET',
         dataType: 'json',

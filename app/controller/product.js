@@ -7,6 +7,12 @@ exports.list = async(ctx) => {
 }
 exports.detail = async(ctx) => {
   const products = await ctx.model.Product.listAll();
+  products.forEach(product => {
+    if (product.unit_price && product.unit_price.price &&
+      typeof product.unit_price.price.segmented === 'undefined') {
+      product.unit_price.price.segmented = [];
+    }
+  });
   ctx.body = {
     "products": products,
     "total_count": products.length,
@@ -106,10 +112,8 @@ exports.showPrice = async(ctx) => {
 };
 
 async function closeOrders(ctx) {
-
   const params = ctx.params;
   const orders = await ctx.model.Order.findOrderByProductId(params.product_id);
-
   ctx.body = {};
 
   let promises = [];
@@ -215,7 +219,6 @@ async function buildOrders(ctx, reqBody, module, tag, rest) {
       const amount = await service.getProductAmount(body, opt);
       const price = ctx.service.price.calculatePrice(priceObj, amount);
       const attr = service.getResourceAttribute(body, resp, opt.tag);
-
       const deductId = uuidV4();
       const orderId = uuidV4();
 
@@ -241,7 +244,6 @@ async function buildOrders(ctx, reqBody, module, tag, rest) {
         created_at: now * 1000,
       });
     }
-
     const p1 = ctx.model.Order.bulkCreate(orders);
     const p2 = ctx.model.Deduct.bulkCreate(deducts);
 
@@ -297,7 +299,6 @@ exports.update = async(ctx) => {
     /**
      * 1. Compare the price.
      */
-
     const oldPrice = await ctx.service.price.calculatePrice(JSON.parse(oldProduct.unit_price), 1);
     const newPrice = await ctx.service.price.calculatePrice(JSON.parse(body.unit_price), 1);
     if (oldPrice != newPrice) {
