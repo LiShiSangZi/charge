@@ -19,13 +19,10 @@ module.exports = app => {
       let price = parseFloat(base_price);
       if (type === 'segmented' && segmented && segmented.length > 0) {
         // TODO: Add segmented price here.
-        segmented.sort((a, b) => a.count - b.count);
+        segmented.sort((a, b) => -a.count + b.count);
         let index = 0;
-        while (segmented[index] && segmented[index].count < amount) {
+        while (segmented[index] && segmented[index].count > amount) {
           index++;
-        }
-        if (index >= segmented.length) {
-          index--;
         }
         if (segmented[index] && segmented[index].price) {
           return calNumber(segmented[index].price * amount);
