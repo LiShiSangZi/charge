@@ -119,10 +119,10 @@ module.exports = app => {
 
     async filterResult(result, service, tag, obj, rest) {
       if (rest && rest.length > 0) {
-        return result.filter(v => v.volume_type === rest[0]);
-      } else {
-        return result;
+        result[`${tag}s`] = result[`${tag}s`].filter(v => v.volume_type === rest[0]);
       }
+      return result;
+
     }
   }
   return Volume;

@@ -484,7 +484,7 @@ module.exports = (app) => {
       });
 
       if (res && res.data) {
-        return await this.filterResult(res.data, tag, obj, rest);
+        return await this.filterResult(res.data, service, tag, obj, rest);
       }
     }
   }

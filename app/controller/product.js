@@ -56,7 +56,6 @@ exports.create = async(ctx) => {
   } else {
     ctx.throw(400, 'Name is invalid!');
   }
-
   ctx.body = {
     product: instance.toJSON()
   }
