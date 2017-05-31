@@ -41,6 +41,7 @@ jspm_packages
 
 # Configure file.
 config.default.js*
+config.*.js
 
 # Yarn lock.
 yarn.lock
