@@ -22,11 +22,11 @@ module.exports = app => {
   // app.put(`/${APIVERSION}/products/:product_id`, 'product.update');
   // app.get(`/${APIVERSION}/products/price`, 'product.showPrice');
 
-  app.get(`/${APIVERSION}/accounts/:userId`, 'account.detail');
-  app.put(`/${APIVERSION}/accounts/:userId`, 'account.charge');
-  app.put(`/${APIVERSION}/accounts/:userId/level`, 'account.setLevel');
+  app.get(`/${APIVERSION}/accounts/:userId`, app.middlewares.userAuth(), 'account.detail');
+  app.put(`/${APIVERSION}/accounts/:userId`, app.middlewares.adminAuth(), 'account.charge');
+  app.put(`/${APIVERSION}/accounts/:userId/level`, app.middlewares.adminAuth(), 'account.setLevel');
   app.get(`/${APIVERSION}/accounts`, 'account.list');
-  app.post(`/${APIVERSION}/accounts`, 'account.create');
+  app.post(`/${APIVERSION}/accounts`, app.middlewares.adminAuth(), 'account.create');
 
   /**
    * API for the product setting.
@@ -38,7 +38,7 @@ module.exports = app => {
   /**
    * API for the charge record.
    */
-  app.get(`/${APIVERSION}/accounts/charges/:userId`, 'charge.list');
+  app.get(`/${APIVERSION}/accounts/charges/:userId`, app.middlewares.userAuth(), 'charge.list');
   
   /**
    * API for the order.

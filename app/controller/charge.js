@@ -2,8 +2,8 @@
 
 exports.list = async (ctx) => {
   const userId = ctx.params.userId;
-  const limit = parseInt(ctx.query.limit, 10);
-  const offset = parseInt(ctx.query.offset, 10);
+  const limit = parseInt(ctx.query.limit, 10) || 10;
+  const offset = parseInt(ctx.query.offset, 10) || 0;
 
   const res = await ctx.model.Charge.fetchCharge(userId, limit, offset);
   const output = {};

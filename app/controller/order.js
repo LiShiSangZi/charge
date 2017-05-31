@@ -2,8 +2,8 @@
 
 exports.list = async ctx => {
   const userId = ctx.user.id;
-  const limit = parseInt(ctx.query.limit, 10);
-  const offset = parseInt(ctx.query.offset, 10);
+  const limit = parseInt(ctx.query.limit, 10) || 10;
+  const offset = parseInt(ctx.query.offset, 10) || 0;
   const status = ctx.query.status;
   const resource_id = ctx.query.resource_id;
   const opt = {
@@ -44,8 +44,8 @@ exports.getTypes = async ctx => {
  * Search the deduct for the order id.
  */
 exports.detail = async ctx => {
-  const limit = parseInt(ctx.query.limit, 10);
-  const offset = parseInt(ctx.query.offset, 10);
+  const limit = parseInt(ctx.query.limit, 10) || 10;
+  const offset = parseInt(ctx.query.offset, 10) || 0;
 
   const orderId = ctx.params.orderId;
   const now = Date.now();
