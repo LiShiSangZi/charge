@@ -27,7 +27,7 @@ exports.list = async ctx => {
     });
     return newRow;
   });
-  
+
   ctx.body = {
     orders: newOrders,
     total_count: order.count,
@@ -49,21 +49,28 @@ exports.detail = async ctx => {
 
   const orderId = ctx.params.orderId;
   const now = Date.now();
+  const userId = ctx.user.id;
 
-  const deduct = await ctx.app.model.Deduct.filterByOrder(orderId, limit, offset);
-  const result = deduct.rows.map(row => {
-    return {
-      "end_time": row.updated_at,
-      "remarks": row.remark,
-      "start_time": row.created_at,
-      "total_price": row.money,
-      "unit": "hour",
-      "unit_price": row.price,
+  const isOwner = await ctx.app.model.Order.isYourOrder(orderId, userId);
+  if (isOwner) {
+    const deduct = await ctx.app.model.Deduct.filterByOrder(orderId, limit, offset);
+
+    if (deduct && deduct.rows && deduct.rows.length > 0) {
+      const result = deduct.rows.map(row => {
+        return {
+          "end_time": row.updated_at,
+          "remarks": row.remark,
+          "start_time": row.created_at,
+          "total_price": row.money,
+          "unit": "hour",
+          "unit_price": row.price,
+        }
+      });
+
+      ctx.body = {
+        bills: result,
+        total_count: deduct.count,
+      };
     }
-  });
-
-  ctx.body = {
-    bills: result,
-    total_count: deduct.count,
-  };
+  }
 }

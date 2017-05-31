@@ -186,6 +186,15 @@ module.exports = app => {
           attributes: ATTRIBUTES
         });
       },
+      async isYourOrder(orderId, userId) {
+        const order = await this.findOne({
+          where: {
+            user_id: userId,
+            order_id: orderId,
+          }
+        });
+        return order != null;
+      },
       /**
        * Build the order by id.
        */
