@@ -289,7 +289,7 @@ module.exports = (app) => {
             });
           }
           // Calculate the order's charge and close it.
-          const newPromise = this.ctx.service.utils.order.calOrder(order, 
+          const newPromise = this.ctx.service.utils.order.calOrder(order,
             deduct, project, user, true);
           promises = promises.concat(newPromise);
           promisesIndex += newPromise.length;
@@ -386,11 +386,23 @@ module.exports = (app) => {
     getResourceAttribute(req, res, tag) {
       if (res) {
         const o = {
-          "resource_id": res[this.tag || tag].id,
-          "resource_name": res[this.tag || tag].name,
+          "resource_id": res.id,
+          "resource_name": res.name,
         };
+
+        if (!o.resource_name && res[this.tag || tag]) {
+          o.resource_name = res[this.tag || tag].name;
+        }
+        if (!o.resource_id && res[this.tag || tag]) {
+          o.resource_id = res[this.tag || tag].id;
+        }
+
+
         if (!o.resource_name && req[this.tag || tag]) {
           o.resource_name = req[this.tag || tag].name;
+        }
+        if (!o.resource_id && req[this.tag || tag]) {
+          o.resource_id = req[this.tag || tag].id;
         }
         return o;
       }
