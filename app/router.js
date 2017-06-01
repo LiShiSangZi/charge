@@ -13,7 +13,7 @@ module.exports = app => {
   app.post(`/${APIVERSION}/products`, app.middlewares.adminAuth(), 'product.create');
   app.delete(`/${APIVERSION}/products/:product_id`, app.middlewares.adminAuth(), 'product.delete');
   app.put(`/${APIVERSION}/products/:product_id`, app.middlewares.adminAuth(), 'product.update');
-  app.get(`/${APIVERSION}/products/price`, app.middlewares.adminAuth(), 'product.showPrice');
+  app.get(`/${APIVERSION}/products/price`, 'product.showPrice');
 
   // app.get(`/${APIVERSION}/products`, 'product.list');
   // app.get(`/${APIVERSION}/products/detail`, 'product.detail');
