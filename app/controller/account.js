@@ -104,6 +104,48 @@ exports.list = async(ctx) => {
   };
 };
 
+exports.summary = async(ctx) => {
+  const userId = ctx.params.userId;
+  let start = parseInt(ctx.query.start, 10);
+  let end = parseInt(ctx.query.end, 10);
+  if (!start || isNaN(start)) {
+    start = Date.now();
+  }
+  if (!end || isNaN(end)) {
+    end = Date.now();
+  }
+
+  start = new Date(start);
+  end = new Date(end);
+
+  start.setHours(0, 0, 0, 0);
+  end.setHours(23, 59, 59, 999);
+
+  start = start.getTime();
+  end = end.getTime();
+  if (start >= end) {
+    ctx.throw(400);
+  }
+  let userCondition = '';
+  if (userId && userId !== 'summary') {
+    userCondition = ` AND o.user_id = :userId`
+  }
+
+  const orders = await ctx.app.model.query(`SELECT o.user_id, o.order_id, o.resource_id, o.type, o.status, o.unit_price, o.total_price, sum(d.money) as money, min(d.created_at) as start, max(d.updated_at) as end
+FROM gringotts.order o LEFT JOIN deduct d ON d.order_id = o.order_id
+WHERE (d.created_at <= :end AND d.updated_at >= :start)${userCondition} AND money > 0
+GROUP BY d.order_id
+ORDER BY type, resource_id`, {
+    replacements: {
+      userId,
+      start,
+      end,
+    }
+  });
+
+  ctx.body = orders;
+}
+
 exports.create = async(ctx) => {
   if (!ctx.isAdmin) {
     ctx.throw(409);
