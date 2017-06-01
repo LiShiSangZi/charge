@@ -75,12 +75,12 @@ module.exports = (app) => {
         if (project.user_id) {
 
           user.consumption += chMoney;
-          let leftMoney = chMoney;
-          if (user.reward_value > 0 && user.reward_value < chMoney) {
-            leftMoney = chMoney - user.reward_value;
+          if (user.reward_value < chMoney) {
             user.reward_value = 0;
+          } else {
+            user.reward_value = user.reward_value - chMoney;
           }
-          user.balance -= leftMoney;
+          user.balance -= chMoney;
           order.user_id = user.user_id;
         }
       } else {
