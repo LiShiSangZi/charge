@@ -60,13 +60,17 @@ module.exports = app => {
       fields: ["charge_id", "user_id"]
     }],
     classMethods: {
-      fetchCharge(id, limit, offset) {
+      fetchCharge(id, type, limit, offset) {
+        const where = {
+          user_id: id,
+        };
+        if (type) {
+          where.type = type;
+        }
         return this.findAndCount({
           limit: limit,
           offset: offset,
-          where: {
-            user_id: id,
-          },
+          where: where,
           order: [
             ['created_at', 'DESC'],
             ['updated_at', 'DESC']

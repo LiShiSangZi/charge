@@ -2,10 +2,13 @@
 
 exports.list = async (ctx) => {
   const userId = ctx.params.userId;
+
+  const type = ctx.query.type;
+
   const limit = parseInt(ctx.query.limit, 10) || 10;
   const offset = parseInt(ctx.query.offset, 10) || 0;
 
-  const res = await ctx.model.Charge.fetchCharge(userId, limit, offset);
+  const res = await ctx.model.Charge.fetchCharge(userId, type, limit, offset);
   const output = {};
   output.charges = res.rows.map(row => {
     return {
