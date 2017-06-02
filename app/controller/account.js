@@ -57,8 +57,8 @@ exports.charge = async(ctx) => {
     "user_id": userId,
   };
 
-  if (body.type && body.come_from) {
-    query.type = body.type;
+  query.type = body.type || null;
+  if (body.come_from) {
     query.come_from = body.come_from;
   } else {
     query.operator = ctx.user.id;
