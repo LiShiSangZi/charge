@@ -203,31 +203,3 @@ describe('test/controller/middleware.test.js', () => {
     }
   });
 });
-
-
-
-// describe('test/controller/middleware.test.js', () => {
-//   let app;
-//   before(() => {
-//     app = mock.app();
-//     return app.ready();
-//   });
-//   afterEach(mock.restore);
-
-//   it('process the migrate of the order', async() => {
-
-//     await app.model.Test.sync();
-
-//     const testCreate = await app.model.Test.create({
-//       user_id: '2ca22a2b-c648-4393-ab62-5c198eaf1efe'
-//     });
-
-//     const testObj = await app.model.Test.findAll();
-//     testObj.forEach(o => {
-//       o.user_id = '2ca22a2b-e648-4393-ab62-5c198eaf1efe';
-//       o.save();
-//     });
-
-    
-//   });
-// });
