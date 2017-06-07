@@ -88,9 +88,6 @@ describe('test/controller/middleware.test.js', () => {
     for (let i = 0; i < products.length; i++) {
       const product = products[i];
       console.log(product.name, product.product_id);
-      if (product.product_id !== '483555ce-799b-4d5e-9228-d463abef51ca') {
-        continue;
-      }
 
 
       const [module, tag, ...rest] = product.name.split(':');
