@@ -18,7 +18,7 @@ module.exports = (app) => {
     async calOrder(order, deduct, project, user, close, createNew, transaction) {
       const promises = [];
       let promiseIndex = 0;
-      if (deduct && order.deduct_id !== deduct.deduct_id) {
+      if (!deduct || (deduct && order.deduct_id !== deduct.deduct_id)) {
         // The deduct is not current one.
         return;
       }
