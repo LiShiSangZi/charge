@@ -66,11 +66,12 @@ module.exports = app => {
 
         return projectMap;
       },
-      findProjectWithAccountById(id) {
+      findProjectWithAccountById(id, transaction) {
         return this.findOne({
           where: {
             project_id: id,
           },
+          transaction: transaction,
           include: [app.model.models.account],
         });
       },

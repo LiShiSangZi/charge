@@ -23,6 +23,9 @@ exports.create = async(ctx) => {
   if (!ctx.isAdmin) {
     ctx.throw(409);
   }
+
+  const t = await app.model.transaction();
+
   const body = ctx.request.body;
   const name = body.name;
   const [module, tag, ...rest] = name.split(':');
@@ -41,7 +44,7 @@ exports.create = async(ctx) => {
   }
   const productId = uuidV4();
   body.product_id = productId;
-  const resources = await buildOrders(ctx, body, module, tag, rest);
+  const resources = await buildOrders(ctx, body, module, tag, rest, t);
   let instance;
   const keyFields = `${tag}s`;
   if (resources && resources[keyFields]) {
@@ -55,10 +58,13 @@ exports.create = async(ctx) => {
     });
   } else {
     ctx.throw(400, 'Name is invalid!');
+    t.rollback();
   }
+  t.commit();
   ctx.body = {
     product: instance.toJSON()
   }
+
 };
 
 exports.showPrice = async(ctx) => {
@@ -181,7 +187,7 @@ async function closeOrders(ctx, transaction) {
   return res;
 }
 
-async function buildOrders(ctx, reqBody, module, tag, rest) {
+async function buildOrders(ctx, reqBody, module, tag, rest, t) {
   const region = reqBody.region_id || 'RegionOne';
   let service = ctx.service;
 
@@ -218,7 +224,7 @@ async function buildOrders(ctx, reqBody, module, tag, rest) {
       const projectId = await service.getProjectId(resource);
       let projectOpt = cachedProjects[projectId];
       if (!projectOpt) {
-        projectOpt = await ctx.model.Project.findProjectWithAccountById(projectId);
+        projectOpt = await ctx.model.Project.findProjectWithAccountById(projectId, t);
         cachedProjects[projectId] = projectOpt;
       }
 
@@ -257,8 +263,12 @@ async function buildOrders(ctx, reqBody, module, tag, rest) {
         created_at: now * 1000,
       });
     }
-    const p1 = ctx.model.Order.bulkCreate(orders);
-    const p2 = ctx.model.Deduct.bulkCreate(deducts);
+    const p1 = ctx.model.Order.bulkCreate(orders, {
+      transaction: t,
+    });
+    const p2 = ctx.model.Deduct.bulkCreate(deducts, {
+      transaction: t,
+    });
 
     await Promise.all([p1, p2]);
   }
@@ -278,23 +288,17 @@ exports.delete = async(ctx) => {
     transaction: t,
   });
 
-  try {
-    if (instance < 1) {
-      ctx.throw(404);
-      // Close the transaction. Actually nothing changed.
-      t.commit();
-    } else {
-      await closeOrders(ctx, t);
-      // Commit the data.
-      t.commit();
-      ctx.body = {
-        res: 'Done'
-      };
-    }
-  } catch (e) {
-    // Catch the error. Rollback any updates.
-    t.rollback();
-    ctx.throw(503, 'The service is not available at moment.');
+  if (instance < 1) {
+    ctx.throw(404);
+    // Close the transaction. Actually nothing changed.
+    t.commit();
+  } else {
+    await closeOrders(ctx, t);
+    // Commit the data.
+    t.commit();
+    ctx.body = {
+      res: 'Done'
+    };
   }
 }
 
@@ -308,13 +312,16 @@ exports.update = async(ctx) => {
     body.unit_price = JSON.stringify(body.unit_price);
   }
 
+  const t = await app.model.transaction();
   // Fetch the old product to see if the price is updated.
   const oldProduct = await ctx.model.Product.findOne({
-    where: params
+    where: params,
+    transaction: t,
   });
 
   const instance = await ctx.model.Product.update(body, {
-    where: params
+    where: params,
+    transaction: t,
   });
 
   if (instance.length > 0) {
@@ -331,13 +338,15 @@ exports.update = async(ctx) => {
       /**
        * 2. Scan the orders and close them.
        */
-      const newOrders = await closeOrders(ctx);
+      const newOrders = await closeOrders(ctx, t);
       body.unit_price = JSON.parse(body.unit_price);
       body.product_id = params.product_id;
-      const resources = await buildOrders(ctx, body, module, tag, rest);
+      const resources = await buildOrders(ctx, body, module, tag, rest, t);
     }
+    t.commit();
     ctx.body = {
       "result": "Done"
     };
+    return;
   }
 }
