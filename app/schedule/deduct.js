@@ -11,7 +11,7 @@ module.exports = app => {
 
     async task(ctx) {
       const nowNum = Date.now();
-      
+
       const users = await ctx.app.model.Account.listAccountMap();
 
       const projects = await ctx.app.model.Project.listProductMap();
@@ -33,27 +33,24 @@ module.exports = app => {
       }
       const nowDateTimestamp = nowDate.getTime();
 
-      // const needNewDeduct = nowDate.getHours() < 1;
-      // const needNewDeduct = true;
-      let promises = [];
-      let promiseIndex = 0;
-      deducts.forEach((deduct, index) => {
+      const t = await app.model.transaction();
+
+      for (let index = 0; index < deducts.length; index++) {
+        const deduct = deducts[index];
         const order = orders[deduct.order_id];
-        if (!order || order.status === 'deleted') {
+        if (!order || order.status === 'deleted' ||
+          order.deduct_id !== deduct.deduct_id) {
           // The order is inactive.
-          return;
+          continue;
         }
 
-        if (order.deduct_id !== deduct.deduct_id) {
-          // The deduct is not current one.
-          return;
-        }
         const project = projects.get(order.project_id);
         if (!project || !project.user_id) {
-          return;
+          continue;
         }
         const user = users.get(project.user_id);
         let newDeduct = false;
+
         const original = new Date(deduct.created_at);
         if (ctx.app.config.schedule.singleOrderDuration == 'h') {
           // 按小时分deduct:
@@ -74,23 +71,25 @@ module.exports = app => {
             newDeduct = true;
           }
         }
+        const r = await ctx.service.utils.order.calOrder(order, deduct, project,
+          user, false, newDeduct, t);
 
-        const r = ctx.service.utils.order.calOrder(order, deduct, project,
-          user, false, newDeduct);
-        promises = promises.concat(r);
-        promiseIndex += r.length;
+      }
 
-      });
+      for (let proIndex = 0; proIndex < projects.length; proIndex++) {
+        const proj = projects[proIndex];
+        proj.save({
+          transaction: t,
+        });
+      }
+      for (let userIndex = 0; userIndex < users.length; userIndex++) {
+        const user = users[userIndex];
+        user.save({
+          transaction: t,
+        });
+      }
 
-      projects.forEach(proj => {
-        promises[promiseIndex++] = proj.save();
-      });
-
-      users.forEach(user => {
-        promises[promiseIndex++] = user.save();
-      });
-
-      await Promise.all(promises);
+      t.commit();
 
       // Remove the frozen data more than an hour.
       const critical = Date.now() - 3600000;
@@ -101,8 +100,6 @@ module.exports = app => {
           },
         },
       });
-
-      console.log(new Date(nowNum), Date.now() - nowNum);
     }
   }
 }
