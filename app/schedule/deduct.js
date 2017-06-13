@@ -78,13 +78,13 @@ module.exports = app => {
 
       for (let proIndex = 0; proIndex < projects.length; proIndex++) {
         const proj = projects[proIndex];
-        proj.save({
+        await proj.save({
           transaction: t,
         });
       }
       for (let userIndex = 0; userIndex < users.length; userIndex++) {
         const user = users[userIndex];
-        user.save({
+        await user.save({
           transaction: t,
         });
       }

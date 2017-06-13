@@ -253,7 +253,7 @@ module.exports = (app) => {
      * @param {*String} uuid 
      * @param {*String} region 
      */
-    async closeOrder(uuid, region) {
+    async closeOrder(uuid, region, t) {
       if (!region) {
         region = 'RegionOne';
       }
@@ -273,42 +273,43 @@ module.exports = (app) => {
           const deduct = await this.ctx.model.Deduct.findOne({
             where: {
               deduct_id: order.deduct_id
-            }
+            },
+            transactin: t,
           });
           let project = await this.ctx.model.Project.findOne({
             where: {
               project_id: order.project_id,
-            }
+            },
+            transactin: t,
           });
           let user = null;
           if (project && project.user_id) {
             user = await this.ctx.model.Account.findOne({
               where: {
                 user_id: project.user_id,
-              }
+              },
+              transactin: t,
             });
           }
           // Calculate the order's charge and close it.
-          const newPromise = this.ctx.service.utils.order.calOrder(order,
-            deduct, project, user, true);
-          promises = promises.concat(newPromise);
-          promisesIndex += newPromise.length;
+          const newPromise = await this.ctx.service.utils.order.calOrder(order,
+            deduct, project, user, true, false, t);
           projects[project.project_id] = project;
           users[user.user_id] = user;
         }
       }
-
-      Object.keys(projects).forEach(k => {
+      for (let k in projects) {
         const project = projects[k];
-        promises[promisesIndex++] = project.save();
-      });
-
-      Object.keys(users).forEach(k => {
+        await project.save({
+          transactin: t,
+        });
+      }
+      for (let k in users) {
         const user = users[k];
-        promises[promisesIndex++] = user.save();
-      });
-
-      await Promise.all(promises);
+        await user.save({
+          transactin: t,
+        });
+      }
     }
 
     async getUnit(body) {
