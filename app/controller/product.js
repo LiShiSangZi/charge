@@ -110,9 +110,22 @@ exports.showPrice = async(ctx) => {
   ctx.body = res;
 };
 
-async function closeOrders(ctx) {
+/**
+ * Close all orders and calulate the balance at once. According to the product id.
+ * This is used when a product is updated or deleted.
+ * 
+ * @param {*Context} ctx.product_id The target product id.
+ * @param {*Transaction} transaction The transaction instance.
+ */
+async function closeOrders(ctx, transaction) {
   const params = ctx.params;
   const orders = await ctx.model.Order.findOrderByProductId(params.product_id);
+
+  const addOpt = {};
+  if (transaction) {
+    addOpt.transaction = transaction;
+  }
+
   ctx.body = {};
 
   let promises = [];
@@ -126,44 +139,45 @@ async function closeOrders(ctx) {
       const deduct = await ctx.model.Deduct.findOne({
         where: {
           deduct_id: order.deduct_id
-        }
+        },
+        transaction: transaction,
       });
       let project = await ctx.model.Project.findOne({
         where: {
           project_id: order.project_id,
-        }
+        },
+        transaction: transaction,
       });
       let user = null;
       if (project && project.user_id) {
         user = await ctx.model.Account.findOne({
           where: {
             user_id: project.user_id,
-          }
+          },
+          transaction: transaction,
         });
       }
       projects[project.project_id] = project;
       users[user.user_id] = user;
       // Calculate the order's charge and close it.
-      promises = promises.concat(ctx.service.utils.order.calOrder(order, deduct, project, user, true));
+      await ctx.service.utils.order.calOrder(order, deduct, project, user, true, false, transaction);
     }
 
-
-    Object.keys(projects).forEach(k => {
+    for (let k in projects) {
       const project = projects[k];
-      promises[promisesIndex++] = project.save();
-    });
+      await project.save(addOpt);
+    }
 
-    Object.keys(users).forEach(k => {
+    for (let k in users) {
       const user = users[k];
-      promises[promisesIndex++] = user.save();
-    });
+      await user.save(addOpt);
+    }
 
     res[i] = JSON.parse(JSON.stringify(order.toJSON()));
     delete res[i]['created_at'];
     delete res[i]['updated_at'];
   }
 
-  await Promise.all(promises);
   return res;
 }
 
@@ -257,20 +271,30 @@ exports.delete = async(ctx) => {
     ctx.throw(409);
   }
   const params = ctx.params;
-  const targetProducts = await ctx.model.Product.findAll({
-    where: params,
-  });
+  const t = await app.model.transaction();
+
   const instance = await ctx.model.Product.destroy({
     where: params,
+    transaction: t,
   });
 
-  if (instance < 1) {
-    ctx.throw(404);
-  } else {
-    await closeOrders(ctx);
-    ctx.body = {
-      res: 'Done'
-    };
+  try {
+    if (instance < 1) {
+      ctx.throw(404);
+      // Close the transaction. Actually nothing changed.
+      t.commit();
+    } else {
+      await closeOrders(ctx, t);
+      // Commit the data.
+      t.commit();
+      ctx.body = {
+        res: 'Done'
+      };
+    }
+  } catch (e) {
+    // Catch the error. Rollback any updates.
+    t.rollback();
+    ctx.throw(503, 'The service is not available at moment.');
   }
 }
 

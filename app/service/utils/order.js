@@ -16,11 +16,14 @@ module.exports = (app) => {
      * @param {Boolean} createNew will create a new deduct.
      */
     async calOrder(order, deduct, project, user, close, createNew, transaction) {
-      const promises = [];
-      let promiseIndex = 0;
       if (!deduct || (deduct && order.deduct_id !== deduct.deduct_id)) {
         // The deduct is not current one.
         return;
+      }
+
+      const addOpt = {};
+      if (transaction) {
+        addOpt.transaction = transaction;
       }
 
       let priceUnit = 3600;
@@ -44,11 +47,11 @@ module.exports = (app) => {
       deduct.set('money', parseFloat(totalCharge.toFixed(4)));
       deduct.set('updated_at', now * 1000);
 
-      promises[promiseIndex++] = deduct.save();
+      await deduct.save(addOpt);
       if (createNew) {
         const uuid = uuidV4();
         // Create a new empty deduct.
-        promises[promiseIndex++] = this.ctx.app.model.Deduct.create({
+        await this.ctx.app.model.Deduct.create({
           deduct_id: uuid,
           resource_id: order.resource_id,
           type: order.type,
@@ -57,7 +60,7 @@ module.exports = (app) => {
           price: order.unit_price,
           updated_at: now * 1000,
           created_at: now * 1000,
-        });
+        }, addOpt);
         order.deduct_id = uuid;
       }
       order.total_price += chMoney;
@@ -88,9 +91,7 @@ module.exports = (app) => {
          * TODO: The project is no longer available. We should do something.
          */
       }
-      promises[promiseIndex++] =  order.save();
-      return promises;
-
+      await order.save(addOpt);
     }
   }
 
