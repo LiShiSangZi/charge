@@ -110,6 +110,7 @@ module.exports = (app) => {
           option.product.product_id, project.account.user_id, opt);
 
       } else if (opt.phase === 'after') {
+
         const tempOrder = await this.ctx.model.Frozen.findByRequestId(opt.requestId);
         if (!tempOrder) {
           // No frozen data found. Because the resource does not require charge.
@@ -135,7 +136,14 @@ module.exports = (app) => {
         // 解冻费用。生成order。
         await tempOrder.destroy();
 
-        await this.ctx.model.Order.createOrder(attr);
+
+        const order = await this.ctx.model.Order.createOrder(attr);
+        const meta = await this.generateMetaData(opt, attr, order);
+
+        // TODO: Save the meta data here.
+        if (meta) {
+
+        }
       }
     }
 
@@ -152,6 +160,15 @@ module.exports = (app) => {
      */
     async GET(opt) {
       // await this.getProduct(region, body, catalogs);
+    }
+
+    /**
+     * Save the meta data for the additional purpose. This is a placeholder function.
+     * @param {*Option} opt The passed in options.
+     * @param {*Order} attr The order JSON.
+     */
+    async generateMetaData(opt, attr) {
+      return null;
     }
 
     async checkBalance(project, estimatePrice) {

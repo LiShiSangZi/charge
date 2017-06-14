@@ -96,6 +96,24 @@ module.exports = app => {
       return resource['os-vol-tenant-attr:tenant_id'];
     }
 
+    /**
+     * Overrided
+     * 
+     * @param {*} opt 
+     * @param {*} attr 
+     */
+    async generateMetaData(opt, attr, order) {
+      console.log(opt);
+      return [{
+        "order_id": order.order_id,
+        "resource_id": order.resource_id,
+        "name": "size",
+        "value": opt.response.value
+      }, {
+
+      }];
+    }
+
     async getProductName(service, tag, body, catalogs, region) {
       if (body.restore && body.restore.type) {
         return `cinder:volume:${body.restore.type}`;
