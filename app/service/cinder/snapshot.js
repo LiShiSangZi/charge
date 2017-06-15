@@ -10,6 +10,50 @@ module.exports = app => {
       super(ctx);
       this.tag = 'snapshot';
     }
+    /**
+     * Overrided
+     * 
+     */
+    async generateMetaData(order, body, attr, catalogs, region) {
+      if (body.snapshot) {
+        const volumeId = body.snapshot.volume_id;
+        if (volumeId) {
+          const o = await this.getTokenAndEndpoint({
+            module: 'cinder',
+            region: region,
+          });
+          const res = await this.ctx.curl(`${o.endpoint}/volumes/${volumeId}`, {
+            method: 'GET',
+            dataType: 'json',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Auth-Token': o.token,
+            },
+          });
+          if (res.data && res.data.volume && res.data.volume.size) {
+            return [{
+              order_id: order.order_id,
+              resource_id: order.resource_id,
+              name: 'size',
+              value: res.data.volume.size,
+              type: 'number',
+            }, {
+              order_id: order.order_id,
+              resource_id: order.resource_id,
+              name: 'sourceName',
+              value: res.data.volume.name,
+              type: 'string',
+            }, {
+              order_id: order.order_id,
+              resource_id: order.resource_id,
+              name: 'sourceId',
+              value: volumeId,
+              type: 'string',
+            }];
+          }
+        }
+      }
+    }
 
     async getProductAmount(body, opt) {
       if (body.snapshot) {

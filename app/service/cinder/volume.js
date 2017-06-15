@@ -99,18 +99,38 @@ module.exports = app => {
     /**
      * Overrided
      * 
-     * @param {*} opt 
-     * @param {*} attr 
      */
-    async generateMetaData(opt, attr, order) {
-      console.log(opt);
+    async generateMetaData(order, body, attr, catalogs, region) {
+      let type = '';
+      let size = 0;
+
+      if (body.restore && body.restore.type) {
+        // TODO: Need to fix this use case in Test env.
+      } else if (body.volume && body.volume.volume_type) {
+        type = body.volume.volume_type;
+        size = body.volume.size;
+      } else if (body.uuid) {
+        const resource = await this.getSingleResourceById(body.uuid, {
+          tag: 'volume',
+          region: region,
+          module: 'cinder',
+        });
+        type = resource.volume_type;
+        size = resource.size;
+      }
+
       return [{
         "order_id": order.order_id,
         "resource_id": order.resource_id,
         "name": "size",
-        "value": opt.response.value
+        "value": size,
+        "type": typeof size,
       }, {
-
+        "order_id": order.order_id,
+        "resource_id": order.resource_id,
+        "name": "volumeType",
+        "value": type,
+        "type": "string",
       }];
     }
 

@@ -80,7 +80,16 @@ module.exports = (app) => {
         // 解冻费用。生成order。
         await tempOrder.destroy();
 
-        await this.ctx.model.Order.createOrder(attr);
+        const t = await this.ctx.model.transaction();
+
+        const order = await this.ctx.model.Order.createOrder(attr);
+
+        const meta = await this.generateMetaData(order, opt.request, attr, opt.catalog, opt.region);
+
+        if (meta) {
+          this.ctx.model.OrderMeta.createMeta(meta, t);
+        }
+        t.commit();
       }
     }
 
@@ -136,14 +145,17 @@ module.exports = (app) => {
         // 解冻费用。生成order。
         await tempOrder.destroy();
 
+        const t = await this.ctx.model.transaction();
 
         const order = await this.ctx.model.Order.createOrder(attr);
-        const meta = await this.generateMetaData(opt, attr, order);
+
+        const meta = await this.generateMetaData(order, opt.request, attr, opt.catalog, opt.region);
 
         // TODO: Save the meta data here.
         if (meta) {
-
+          this.ctx.model.OrderMeta.createMeta(meta, t);
         }
+        t.commit();
       }
     }
 
@@ -167,7 +179,7 @@ module.exports = (app) => {
      * @param {*Option} opt The passed in options.
      * @param {*Order} attr The order JSON.
      */
-    async generateMetaData(opt, attr) {
+    async generateMetaData(order, body, attr, catalogs, region) {
       return null;
     }
 
