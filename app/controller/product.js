@@ -24,7 +24,7 @@ exports.create = async(ctx) => {
     ctx.throw(409);
   }
 
-  const t = await app.model.transaction();
+  const t = await ctx.app.model.transaction();
 
   const body = ctx.request.body;
   const name = body.name;
@@ -55,12 +55,15 @@ exports.create = async(ctx) => {
       "region_id": body.region_id,
       "description": body.description,
       "unit_price": JSON.stringify(body.unit_price),
+    }, {
+      transaction: t,
     });
   } else {
     ctx.throw(400, 'Name is invalid!');
     t.rollback();
   }
   t.commit();
+
   ctx.body = {
     product: instance.toJSON()
   }
@@ -281,7 +284,7 @@ exports.delete = async(ctx) => {
     ctx.throw(409);
   }
   const params = ctx.params;
-  const t = await app.model.transaction();
+  const t = await ctx.app.model.transaction();
 
   const instance = await ctx.model.Product.destroy({
     where: params,
@@ -295,7 +298,11 @@ exports.delete = async(ctx) => {
   } else {
     await closeOrders(ctx, t);
     // Commit the data.
-    t.commit();
+    // t.commit();
+
+    setTimeout(() => {
+      t.commit();
+    }, 10000);
     ctx.body = {
       res: 'Done'
     };
@@ -312,7 +319,7 @@ exports.update = async(ctx) => {
     body.unit_price = JSON.stringify(body.unit_price);
   }
 
-  const t = await app.model.transaction();
+  const t = await ctx.app.model.transaction();
   // Fetch the old product to see if the price is updated.
   const oldProduct = await ctx.model.Product.findOne({
     where: params,
@@ -343,6 +350,7 @@ exports.update = async(ctx) => {
       body.product_id = params.product_id;
       const resources = await buildOrders(ctx, body, module, tag, rest, t);
     }
+
     t.commit();
     ctx.body = {
       "result": "Done"
