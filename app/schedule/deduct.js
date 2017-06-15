@@ -33,7 +33,7 @@ module.exports = app => {
       }
       const nowDateTimestamp = nowDate.getTime();
 
-      const t = await app.model.transaction();
+      const t = await ctx.app.model.transaction();
 
       for (let index = 0; index < deducts.length; index++) {
         const deduct = deducts[index];
@@ -88,7 +88,6 @@ module.exports = app => {
           transaction: t,
         });
       }
-
       t.commit();
 
       // Remove the frozen data more than an hour.
