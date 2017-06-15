@@ -136,7 +136,7 @@ module.exports = app => {
       fields: ["order_id", "resource_id", "user_id", "project_id"]
     }],
     classMethods: {
-      async createOrder(value) {
+      async createOrder(value, transaction) {
         const uuid = uuidV4();
         value.deduct_id = uuid;
         const result = await this.create(value);
@@ -149,6 +149,8 @@ module.exports = app => {
           price: newOrder.unit_price,
           created_at: newOrder.created_at,
           updated_at: newOrder.created_at,
+        }, {
+          transaction: transaction,
         });
         return newOrder;
       },
