@@ -6,6 +6,7 @@ exports.list = async ctx => {
   const offset = parseInt(ctx.query.offset, 10) || 0;
   const status = ctx.query.status;
   const resource_id = ctx.query.resource_id;
+  const detail = ctx.query.detail;
   const opt = {
     user_id: userId,
   };
@@ -15,7 +16,11 @@ exports.list = async ctx => {
   if (resource_id) {
     opt.resource_id = resource_id;
   }
-  const order = await ctx.app.model.Order.findAndCounts(opt, limit, offset);
+
+  const t = await ctx.app.model.transaction();
+
+  const order = await ctx.app.model.Order.findAndCounts(opt, limit, offset, t);
+  
   const newOrders = order.rows.map(row => {
     const newRow = {};
     Object.keys(row.dataValues).forEach(k => {
@@ -27,6 +32,29 @@ exports.list = async ctx => {
     });
     return newRow;
   });
+
+  if (detail === 'true' || detail === true) {
+    const meta = await ctx.app.model.OrderMeta.findByOrderIds(newOrders.map(o => o.order_id), t);
+    // Group the data.
+    const metaDict = new Map();
+    meta.forEach(m => {
+      const orderId = m.order_id;
+      let node = metaDict.get(orderId);
+      if (!node) {
+        node = [m];
+        metaDict.set(orderId, node);
+      } else {
+        node.push(m);
+      }
+    });
+
+    newOrders.forEach(order => {
+      const node = metaDict.get(order.order_id);
+      if (node) {
+        order.metaData = node;
+      }
+    });
+  }
 
   ctx.body = {
     orders: newOrders,

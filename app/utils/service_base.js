@@ -87,7 +87,7 @@ module.exports = (app) => {
         const meta = await this.generateMetaData(order, opt.request, attr, opt.catalog, opt.region);
 
         if (meta) {
-          this.ctx.model.OrderMeta.createMeta(meta, t);
+          await this.ctx.model.OrderMeta.createMeta(meta, t);
         }
         t.commit();
       }
@@ -153,7 +153,7 @@ module.exports = (app) => {
 
         // TODO: Save the meta data here.
         if (meta) {
-          this.ctx.model.OrderMeta.createMeta(meta, t);
+          await this.ctx.model.OrderMeta.createMeta(meta, t);
         }
         t.commit();
       }

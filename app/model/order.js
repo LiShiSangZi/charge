@@ -171,7 +171,7 @@ module.exports = app => {
           }
         });
       },
-      async findAndCounts(opt, limit, offset) {
+      async findAndCounts(opt, limit, offset, t) {
         return await this.findAndCount({
           attributes: ATTRIBUTES,
           limit: limit,
@@ -181,6 +181,7 @@ module.exports = app => {
             ['created_at', 'DESC'],
             ['updated_at', 'DESC']
           ],
+          transaction: t,
         });
       },
       async findAllOrder() {

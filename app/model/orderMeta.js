@@ -57,18 +57,18 @@ module.exports = app => {
           }
         });
       },
-      findByOrderIds(orderId) {
+      findByOrderIds(orderId, transaction) {
         return this.findAll({
           where: {
             order_id: {
-              $in: resourceIds,
+              $in: orderId,
             },
-          }
+          },
+          order: 'order_id',
+          transaction: transaction,
         });
       },
       createMeta(data, transaction) {
-        console.log(data);
-        return;
         return this.bulkCreate(data, {
           transaction: transaction,
         });
