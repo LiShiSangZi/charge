@@ -38,13 +38,25 @@ exports.list = async ctx => {
     // Group the data.
     const metaDict = new Map();
     meta.forEach(m => {
+      const info = {
+
+      }
+      if (m.type === 'number') {
+        info[m.name] = parseFloat(m.value);
+      } else if (m.type === 'object') {
+        info[m.name] = JSON.parse(m.value);
+      } else if (m.type === 'undefined') {
+        info[m.name] = undefined;
+      } else {
+        info[m.name] = m.value;
+      }
       const orderId = m.order_id;
       let node = metaDict.get(orderId);
       if (!node) {
-        node = [m];
+        node = info;
         metaDict.set(orderId, node);
       } else {
-        node.push(m);
+        node[m.name] = info[m.name];
       }
     });
 
