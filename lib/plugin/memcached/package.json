@@ -1,6 +1,0 @@
-{
-  "name": "egg-memcached",
-  "eggPlugin": {
-    "name": "memcached"
-  }
-}

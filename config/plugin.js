@@ -11,7 +11,12 @@ exports.sequelize = {
   package: 'egg-sequelize'
 };
 
+exports.keystone = {
+  enable: true,
+  package: 'egg-keystone'
+};
+
 exports.memcached = {
   enable: true,
-  path: path.join(__dirname, '../lib/plugin/memcached'),
+  package: 'egg-memcached'
 };
