@@ -45,6 +45,7 @@ config.*.js*
 # Yarn lock.
 yarn.lock
 
-
+# env config file.
+env
 
 run
