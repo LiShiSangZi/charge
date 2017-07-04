@@ -6,6 +6,7 @@ exports.list = async ctx => {
   const offset = parseInt(ctx.query.offset, 10) || 0;
   const status = ctx.query.status;
   const resource_id = ctx.query.resource_id;
+  const type = ctx.query.type;
   const detail = ctx.query.detail;
   const opt = {
     user_id: userId,
@@ -15,6 +16,9 @@ exports.list = async ctx => {
   }
   if (resource_id) {
     opt.resource_id = resource_id;
+  }
+  if (type) {
+    opt.type = type;
   }
 
   const t = await ctx.app.model.transaction();

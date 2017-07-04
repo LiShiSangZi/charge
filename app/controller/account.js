@@ -135,12 +135,13 @@ exports.summary = async(ctx) => {
 FROM gringotts.order o LEFT JOIN deduct d ON d.order_id = o.order_id
 WHERE (d.created_at <= :end AND d.updated_at >= :start)${userCondition} AND money > 0
 GROUP BY d.order_id
-ORDER BY type, resource_id`, {
+ORDER BY user_id, type, resource_id`, {
     replacements: {
       userId,
       start,
       end,
-    }
+    },
+    type: ctx.app.model.QueryTypes.SELECT
   });
 
   ctx.body = orders;
