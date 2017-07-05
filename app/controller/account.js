@@ -104,7 +104,12 @@ exports.list = async(ctx) => {
   };
 };
 
-exports.summary = async(ctx) => {
+exports.summarySelect = async(ctx) => {
+  const body = ctx.request.body;
+  await this.summary(ctx, body.ids);
+}
+
+exports.summary = async(ctx, ids) => {
   const userId = ctx.params.userId;
   let start = parseInt(ctx.query.start, 10);
   let end = parseInt(ctx.query.end, 10);
@@ -131,6 +136,11 @@ exports.summary = async(ctx) => {
     userCondition = ` AND o.user_id = :userId`
   }
 
+  if (ids && ids.length > 0) {
+
+    userCondition = `${userCondition} AND o.user_id IN (:ids)`;
+  }
+
   const orders = await ctx.app.model.query(`SELECT o.user_id, o.order_id, o.resource_id, o.type, o.status, o.unit_price, o.total_price, sum(d.money) as money, min(d.created_at) as start, max(d.updated_at) as end
 FROM ${ctx.app.config.sequelize.database}.order o LEFT JOIN deduct d ON d.order_id = o.order_id
 WHERE (d.created_at <= :end AND d.updated_at >= :start)${userCondition} AND money > 0
@@ -140,6 +150,7 @@ ORDER BY user_id, type, resource_id`, {
       userId,
       start,
       end,
+      ids,
     },
     type: ctx.app.model.QueryTypes.SELECT
   });

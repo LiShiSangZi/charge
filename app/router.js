@@ -28,6 +28,7 @@ module.exports = app => {
   app.get(`/${APIVERSION}/accounts`, 'account.list');
   app.post(`/${APIVERSION}/accounts`, app.middlewares.adminAuth(), 'account.create');
   app.get(`/${APIVERSION}/accounts/summary`, app.middlewares.adminAuth(), 'account.summary');
+  app.post(`/${APIVERSION}/accounts/summary`, app.middlewares.adminAuth(), 'account.summarySelect');
   app.get(`/${APIVERSION}/accounts/:userId/summary`, app.middlewares.userAuth(), 'account.summary');
 
   /**
