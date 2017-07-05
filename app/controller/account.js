@@ -132,7 +132,7 @@ exports.summary = async(ctx) => {
   }
 
   const orders = await ctx.app.model.query(`SELECT o.user_id, o.order_id, o.resource_id, o.type, o.status, o.unit_price, o.total_price, sum(d.money) as money, min(d.created_at) as start, max(d.updated_at) as end
-FROM gringotts.order o LEFT JOIN deduct d ON d.order_id = o.order_id
+FROM ${ctx.app.config.sequelize.database}.order o LEFT JOIN deduct d ON d.order_id = o.order_id
 WHERE (d.created_at <= :end AND d.updated_at >= :start)${userCondition} AND money > 0
 GROUP BY d.order_id
 ORDER BY user_id, type, resource_id`, {
