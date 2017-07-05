@@ -34,13 +34,9 @@ exports.chargeModule = {
 /** 是否需要扫描旧表格，并且同步数据。默认为false，不需要。 */
 exports.requireMerge = false;
 
-exports.middleware = ['auth'];
+exports.middleware = ['errorHandler', 'auth'];
 
 const modules = exports.chargeModule.modules;
 exports.auth = {
   ignoreLink: modules.map(module => module.name),
-};
-
-exports.errorHandler = {
-  file: '/var/log/charge/error.log',
 };

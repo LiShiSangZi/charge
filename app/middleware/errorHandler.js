@@ -1,32 +1,7 @@
-const eggLogger = require('egg-logger');
-const EggLogger = eggLogger.EggLogger;
-const Transport = eggLogger.Transport;
-
-class ErrorTransport extends Transport {
-  constructor(props) {
-    super(props);
-  }
-  write(msg) {
-    this._logger.write(msg);
-  }
-}
-
-class ErrorLogger extends EggLogger {
-  constructor(props) {
-    super(props);
-    this.set('errorLogger', new ErrorTransport({
-      level: 'ERROR',
-    }));
-  }
-}
+'use strict';
 
 module.exports = (options, app) => {
-  if (!options || !options.file) {
-    throw new Error('没有配置访问错误日志文件。{config.errorHandler.file}');
-  }
-  const errorLogger = new ErrorLogger({
-    file: options.file,
-  });
+  
   return async (ctx, next) => {
     try {
       await next();
@@ -51,9 +26,7 @@ module.exports = (options, app) => {
       };
 
       const formattedError = renderError(ctx, e, errorTime, errorId, status, message, requestUrl, responseError);
-      errorLogger.write(formattedError);
-
-      ctx.app.emit('error', e, this);
+      ctx.logger.error(formattedError);
     }
   };
 }
