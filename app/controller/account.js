@@ -106,13 +106,13 @@ exports.list = async(ctx) => {
 
 exports.summarySelect = async(ctx) => {
   const body = ctx.request.body;
-  await this.summary(ctx, body.ids);
+  await this.summary(ctx, body.ids, body.start, body.end);
 }
 
-exports.summary = async(ctx, ids) => {
+exports.summary = async(ctx, ids, startTime, endTime) => {
   const userId = ctx.params.userId;
-  let start = parseInt(ctx.query.start, 10);
-  let end = parseInt(ctx.query.end, 10);
+  let start = parseInt(startTime || ctx.query.start, 10);
+  let end = parseInt(endTime || ctx.query.end, 10);
   if (!start || isNaN(start)) {
     start = Date.now();
   }
