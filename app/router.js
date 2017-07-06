@@ -8,8 +8,8 @@ module.exports = app => {
   /**
    * API for the products
    */
-  app.get(`/${APIVERSION}/products`, app.middlewares.adminAuth(), 'product.list');
-  app.get(`/${APIVERSION}/products/detail`, app.middlewares.adminAuth(), 'product.detail');
+  app.get(`/${APIVERSION}/products`, 'product.list');
+  app.get(`/${APIVERSION}/products/detail`, 'product.detail');
   app.post(`/${APIVERSION}/products`, app.middlewares.adminAuth(), 'product.create');
   app.delete(`/${APIVERSION}/products/:product_id`, app.middlewares.adminAuth(), 'product.delete');
   app.put(`/${APIVERSION}/products/:product_id`, app.middlewares.adminAuth(), 'product.update');
