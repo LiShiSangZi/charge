@@ -3,8 +3,9 @@
 const checkModule = require('./scripts/setup');
 
 module.exports = async(app) => {
-
-  checkModule(app.config.chargeModule);
+  if (app.config.ignoreMiddlewareChecker !== true) {
+    checkModule(app.config.chargeModule);
+  }
   app.messenger.once('egg-ready', data => {
     (async() => {
       // Mock a context:

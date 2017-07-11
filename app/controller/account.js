@@ -114,7 +114,7 @@ exports.summary = async(ctx, ids, startTime, endTime) => {
   let start = parseInt(startTime || ctx.query.start, 10);
   let end = parseInt(endTime || ctx.query.end, 10);
   if (!start || isNaN(start)) {
-    start = Date.now();
+    start = 0;
   }
   if (!end || isNaN(end)) {
     end = Date.now();
