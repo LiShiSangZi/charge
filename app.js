@@ -7,19 +7,21 @@ module.exports = async(app) => {
     checkModule(app.config.chargeModule);
   }
   app.messenger.once('init-job', data => {
-    
+
     (async() => {
       // Mock a context:
       const ctx = app.createAnonymousContext();
       await ctx.service.token.initEndpoint();
 
       if (app.config.requireMerge) {
+        console.log('Start merge data....');
         const users = await ctx.service.keystone.fetchUsers('RegionOne');
         const promises = [];
         let index = 0;
 
-        users.users.forEach(user => {
-          promises[index++] = app.model.Account.findOrCreate({
+        for (index = 0; index < users.users.length; index++) {
+          const user = users.users[index];
+          await app.model.Account.findOrCreate({
             where: {
               "user_id": user.id
             },
@@ -28,8 +30,7 @@ module.exports = async(app) => {
               "domain_id": user.domain_id,
             }
           });
-        });
-
+        }
 
         const tokenObj = await ctx.service.token.getToken();
         const endpoint = tokenObj.endpoint['keystone']['RegionOne'];
@@ -57,8 +58,10 @@ module.exports = async(app) => {
             }
           });
           const projects = await ctx.service.keystone.fetchProjects('RegionOne');
-          projects.projects.forEach(project => {
-            promises[index++] = app.model.Project.findOrCreate({
+
+          for (index = 0; index < projects.projects.length; index++) {
+            const project = projects.projects[index];
+            await app.model.Project.findOrCreate({
               where: {
                 "project_id": project.id
               },
@@ -68,11 +71,11 @@ module.exports = async(app) => {
                 "domain_id": project.domain_id,
                 "status": "active",
               }
-            })
-          });
-
-          await Promise.all(promises);
+            });
+          }
         }
+
+        console.log('Merge data done!');
       }
     })().then(res => {});
   });
