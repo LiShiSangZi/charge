@@ -6,7 +6,8 @@ module.exports = async(app) => {
   if (app.config.ignoreMiddlewareChecker !== true) {
     checkModule(app.config.chargeModule);
   }
-  app.messenger.once('egg-ready', data => {
+  app.messenger.once('init-job', data => {
+    
     (async() => {
       // Mock a context:
       const ctx = app.createAnonymousContext();
@@ -72,12 +73,6 @@ module.exports = async(app) => {
 
           await Promise.all(promises);
         }
-
-
-
-
-
-
       }
     })().then(res => {});
   });
