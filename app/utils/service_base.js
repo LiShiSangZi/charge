@@ -36,13 +36,14 @@ module.exports = (app) => {
         const order = await this.ctx.model.Order.findOrderByResource(uuid, opt.region);
         let estimatePrice = option.price;
         if (order && order.length > 0) {
-          estimatePrice = Math.max(0, option.price - order[0].unit_price);
+          estimatePrice = option.price - order[0].unit_price;
           if (estimatePrice === 0 && order[0].product_id === option.product.product_id) {
             return;
           }
-          // console.log(estimatePrice, order[0].product_id, option.product.product_id);
         }
-        await this.checkBalance(project, estimatePrice);
+        if (estimatePrice > 0) {
+          await this.checkBalance(project, estimatePrice);
+        }
         await this.freeze(estimatePrice, option.price,
           option.product.product_id, project.account.user_id, opt);
 
@@ -60,7 +61,6 @@ module.exports = (app) => {
 
         // End the exist order:
         const uuid = this.parsePutUUID(opt);
-
         await this.closeOrder(uuid, opt.region);
 
         const body = opt.request;
@@ -353,7 +353,17 @@ module.exports = (app) => {
      * Parse the uuid out from a request url.
      */
     parseDeleteUUID(url) {
-      return url.replace(/\/$/, '').replace(/^(.*)\//, '').replace(/\?(.*)$/, '').replace(/\.json$/, '');
+      return this.parseUUID(url);
+    }
+
+    parseUUID(url) {
+      let uuid;
+      url.replace(/[a-f,0-9,A-F,-]+\-[a-f,0-9,A-F,-]+/g, (key) => {
+        if (key.length > 16) {
+          uuid = key;
+        }
+      });
+      return uuid;
     }
 
     /**
@@ -361,7 +371,7 @@ module.exports = (app) => {
      * @param {*Options} opt 
      */
     parsePutUUID(opt) {
-      return opt.requestUrl.replace(/\/$/, '').replace(/^(.*)\//, '').replace(/\?(.*)$/, '').replace(/\.json$/, '');
+      return this.parseUUID(opt.requestUrl);
     }
 
     /**

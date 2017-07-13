@@ -13,7 +13,6 @@ module.exports = app => {
     formAPIQueryStr(service, tag, obj, rest) {
       return `${obj.endpoint}/routers`;
     }
-    
   }
   return Router;
 }
