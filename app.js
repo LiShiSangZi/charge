@@ -18,13 +18,14 @@ module.exports = async(app) => {
         const users = await ctx.service.keystone.fetchUsers('RegionOne');
         const promises = [];
         let index = 0;
-
+        const t = await app.model.transaction();
         for (index = 0; index < users.users.length; index++) {
           const user = users.users[index];
           await app.model.Account.findOrCreate({
             where: {
               "user_id": user.id
             },
+            transaction: t,
             defaults: {
               "user_id": user.id,
               "domain_id": user.domain_id,
@@ -65,6 +66,7 @@ module.exports = async(app) => {
               where: {
                 "project_id": project.id
               },
+              transaction: t,
               defaults: {
                 "user_id": roleAssignmentDict.get(project.id) || null,
                 "project_id": project.id,
@@ -74,7 +76,7 @@ module.exports = async(app) => {
             });
           }
         }
-
+        t.commit();
         console.log('Merge data done!');
       }
     })().then(res => {});

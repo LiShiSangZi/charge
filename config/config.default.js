@@ -32,7 +32,7 @@ exports.chargeModule = {
   "keycontext": ["keystonecontext", "authtoken", "context", "json_body", "url_normalize"]
 };
 /** 是否需要扫描旧表格，并且同步数据。默认为false，不需要。 */
-exports.requireMerge = false;
+exports.requireMerge = true;
 
 exports.middleware = ['errorHandler', 'auth'];
 

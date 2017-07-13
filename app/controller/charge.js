@@ -28,4 +28,4 @@ exports.list = async (ctx) => {
   output.total_count = res.count;
 
   ctx.body = output;
-}
+};
