@@ -48,9 +48,14 @@ module.exports = app => {
       required: true
     },
     type: STRING(255),
+    expired: {
+      type: ENUM('Y', 'N'),
+      defaultValue: 'N',
+    },
     amount: DECIMAL(20, 4),
     created_at: BIGINT,
     updated_at: BIGINT,
+    expired_at: BIGINT,
   }, {
     timestamps: false,
     freezeTableName: true,

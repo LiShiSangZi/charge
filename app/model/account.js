@@ -107,11 +107,12 @@ module.exports = app => {
       /**
        * List the product and output as a Map according by the project id.
        */
-      async listAccountMap() {
+      async listAccountMap(t) {
         const accounts = await this.findAll({
           where: {
             status: 'active',
           },
+          transaction: t,
         });
 
         const accountMap = new Map();

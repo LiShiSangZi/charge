@@ -49,6 +49,7 @@ module.exports = app => {
   app.get(`/${APIVERSION}/orders`, 'order.list');
   app.get(`/${APIVERSION}/orders/types`, 'order.getTypes');
   app.get(`/${APIVERSION}/orders/:orderId`, 'order.detail');
+  app.post(`/${APIVERSION}/orders/real`, app.middlewares.adminAuth(), 'order.createRealtime');
   
 
   app.all('/:module', 'middleware.catch');

@@ -84,7 +84,8 @@ module.exports = app => {
       }
       for (let userIndex = 0; userIndex < users.length; userIndex++) {
         const user = users[userIndex];
-        await user.save({
+
+        await ctx.service.account.setAccount(user, {
           transaction: t,
         });
       }

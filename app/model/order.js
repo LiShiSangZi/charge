@@ -141,7 +141,7 @@ module.exports = app => {
         value.deduct_id = uuid;
         const result = await this.create(value);
         const newOrder = result.dataValues;
-        const defaultDedect = app.model.Deduct.create({
+        const newDeduct = {
           deduct_id: uuid,
           resource_id: newOrder.resource_id,
           type: newOrder.type,
@@ -149,7 +149,11 @@ module.exports = app => {
           price: newOrder.unit_price,
           created_at: newOrder.created_at,
           updated_at: newOrder.created_at,
-        }, {
+        };
+        if (value.unit === 'realtime') {
+          newDeduct.money = newOrder.total_price;
+        }
+        const defaultDedect = await app.model.Deduct.create(newDeduct, {
           transaction: transaction,
         });
         return newOrder;
@@ -184,10 +188,12 @@ module.exports = app => {
           transaction: t,
         });
       },
-      async findAllOrder() {
-        return await this.findAll({
-          attributes: ATTRIBUTES
-        });
+      async findAllOrder(o) {
+        if (!o) {
+          o = {};
+        }
+        o.attributes = ATTRIBUTES;
+        return await this.findAll(o);
       },
       async isYourOrder(orderId, userId) {
         const order = await this.findOne({
@@ -202,7 +208,14 @@ module.exports = app => {
        * Build the order by id.
        */
       async buildOrderDict() {
-        const res = await this.findAllOrder();
+        const res = await this.findAllOrder({
+          where: {
+            unit: {
+              $ne: 'realtime',
+            }
+          }
+        });
+        console.log(res);
         const dict = {};
         res.forEach(order => {
           dict[order.order_id] = order;

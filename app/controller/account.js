@@ -4,8 +4,8 @@ exports.detail = async(ctx) => {
   const userId = ctx.params.userId;
 
   const account = await ctx.app.model.Account.getAccountById(userId);
-  account.balance = account.balance.toFixed(4);
-  account.consumption = account.consumption.toFixed(4);
+  console.log(account);
+  account.balance = await ctx.service.account.getBalance(account);account.consumption = account.consumption.toFixed(4);
   if (account.reward_value) {
     account.reward_value = account.reward_value.toFixed(4);
   }
@@ -69,11 +69,13 @@ exports.charge = async(ctx) => {
 
   if (chargeRec) {
     const account = await ctx.app.model.Account.getAccountById(userId);
+
+    
     if (!account.balance) {
-      account.balance = addValue;
-    } else {
-      account.balance += addValue;
+      account.balance = 0;
     }
+    account.balance += addValue;
+    // await ctx.service.setBalance(account, addValue);
 
     if (query.operator) {
       if (account.reward_value === null) {
@@ -95,10 +97,12 @@ exports.charge = async(ctx) => {
 
 exports.list = async(ctx) => {
   const accounts = await ctx.app.model.Account.listAccounts();
-  accounts.forEach(account => {
-    account.balance = account.balance.toFixed(4);
+
+  for (let i = 0; i < accounts.length; i++) {
+    const account = accounts[i];
+    account.balance = await ctx.service.getBalance(account);
     account.consumption = account.consumption.toFixed(4);
-  });
+  }
   ctx.body = {
     accounts: accounts
   };

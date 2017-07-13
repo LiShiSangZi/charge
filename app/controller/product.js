@@ -179,7 +179,7 @@ async function closeOrders(ctx, transaction) {
 
     for (let k in users) {
       const user = users[k];
-      await user.save(addOpt);
+      await ctx.service.account.setAccount(user, addOpt);
     }
 
     res[i] = JSON.parse(JSON.stringify(order.toJSON()));

@@ -24,7 +24,7 @@ exports.list = async ctx => {
   const t = await ctx.app.model.transaction();
 
   const order = await ctx.app.model.Order.findAndCounts(opt, limit, offset, t);
-  
+
   const newOrders = order.rows.map(row => {
     const newRow = {};
     Object.keys(row.dataValues).forEach(k => {
@@ -82,6 +82,66 @@ exports.getTypes = async ctx => {
   ctx.body = {
     types: ["running", "deleted"],
   };
+}
+
+/**
+ * Create realtime order.
+ */
+exports.createRealtime = async ctx => {
+  const body = ctx.request.body;
+  if (!body.data) {
+    ctx.throw(400);
+  }
+  const t = await ctx.app.model.transaction();
+
+  const accountMaps = await ctx.app.model.Account.listAccountMap(t);
+  let found = true;
+
+  for (let i = 0; i < body.data.length; i++) {
+    const orderData = body.data[i].data;
+    const userId = body.data[i].userId;
+    const userObj = accountMaps.get(userId);
+
+    if (!userObj) {
+      found = false;
+      break;
+    }
+
+    await ctx.app.model.Order.createOrder({
+      "region": orderData.region,
+      "resource_name": orderData.resource_name,
+      "resource_id": orderData.resource_id,
+      "type": orderData.type,
+      "unit_price": orderData.total_price,
+      "unit": "realtime",
+      "total_price": orderData.total_price,
+      "user_id": userId,
+    }, t);
+
+    userObj.consumption += orderData.total_price;
+    if (userObj.reward_value < orderData.total_price) {
+      userObj.reward_value = 0;
+    } else {
+      userObj.reward_value = userObj.reward_value - orderData.total_price;
+    }
+    userObj.balance -= orderData.total_price;
+
+
+    // await userObj.save({
+    //   transaction: t,
+    // });
+    await ctx.service.account.setAccount(userObj, {
+      transaction: t,
+    });
+  }
+
+  if (!found) {
+    ctx.throw(400, "Some users are not available!");
+    t.rollback();
+    return;
+  }
+  t.commit();
+  ctx.body = 'Done';
 }
 
 /**

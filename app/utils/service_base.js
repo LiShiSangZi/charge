@@ -204,21 +204,11 @@ module.exports = (app) => {
         if (isNaN(total)) {
           total = 0;
         }
-
-        const balance = account.balance - total;
+        const b = await ctx.service.account.getBalance(account);
+        const balance = parseFloat(b) - total;
 
         if (balance - estimatePrice - minBalance < 0) {
           throw new Error("out_of_balance");
-          // this.ctx.status = 409;
-          // this.ctx.body = 'Out of Balance';
-          // this.ctx.app.emit('error', {
-          //   "message": "Your balance is not enough for the resource."
-          // }, ctx);
-          // this.ctx.throw(409, {
-          //   "message": "out_of_balance",
-          //   "code": 409,
-          //   "title": "Out of Balance",
-          // });
         }
       }
 
@@ -335,8 +325,8 @@ module.exports = (app) => {
       }
       for (let k in users) {
         const user = users[k];
-        await user.save({
-          transactin: t,
+        await ctx.service.account.setAccount(user, {
+          transaction: t,
         });
       }
     }
