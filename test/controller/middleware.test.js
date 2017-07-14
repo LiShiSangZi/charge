@@ -17,15 +17,29 @@ describe('test/service/login.test.js', () => {
   });
   afterEach(mock.restore);
 
+  xit('test the deduct schedule', async() => {
+    await app.model.sync();
+    await app.runSchedule('deduct');
+  });
+
   it('process the update structure of the table', async() => {
     await app.model.sync();
 
     // Ready the query interface:
     const queryInterface = app.model.getQueryInterface();
     const desc = await queryInterface.describeTable('charge');
+
+    if (!desc.consumption) {
+      await queryInterface.addColumn('charge', 'consumption', {
+        type: app.Sequelize.DECIMAL(20, 4),
+        defaultValue: 0,
+      });
+    }
+
     if (!desc.expired_at) {
       await queryInterface.addColumn('charge', 'expired_at', app.Sequelize.BIGINT);
     }
+
     if (!desc.expired) {
       await queryInterface.addColumn('charge', 'expired', {
         type: app.Sequelize.ENUM('Y', 'N'),

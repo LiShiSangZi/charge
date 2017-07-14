@@ -126,7 +126,7 @@ exports.catch = async(ctx) => {
     response_status,
   };
   const module = ctx.params.module;
-  try {
+  // try {
     if (o.response_status) {
       const statusCode = parseInt(o.response_status, 10);
       await preOperationData(ctx, module, request_id, request_headers,
@@ -137,21 +137,21 @@ exports.catch = async(ctx) => {
     }
 
     ctx.body = 'Done';
-  } catch (e) {
-    let code = 400;
-    switch (e.message) {
-      case 'out_of_balance':
-        code = 409;
-        break;
-    }
-    ctx.throw(code, e.message);
-    // ctx.throw(code, e.message);
-    // console.log(e);
-    // switch (e.type) {
-    //   case 'out_of_balance':
-    //     code = 409;
-    // }
-    // console.log(JSON.stringify(e));
-    // ctx.throw(code, e);
-  }
+  // } catch (e) {
+  //   let code = 400;
+  //   switch (e.message) {
+  //     case 'out_of_balance':
+  //       code = 409;
+  //       break;
+  //   }
+  //   ctx.throw(code, e.message);
+  //   // ctx.throw(code, e.message);
+  //   // console.log(e);
+  //   // switch (e.type) {
+  //   //   case 'out_of_balance':
+  //   //     code = 409;
+  //   // }
+  //   // console.log(JSON.stringify(e));
+  //   // ctx.throw(code, e);
+  // }
 }

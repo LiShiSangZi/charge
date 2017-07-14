@@ -52,6 +52,7 @@ module.exports = app => {
       type: ENUM('Y', 'N'),
       defaultValue: 'N',
     },
+    consumption: DECIMAL(20, 4),
     amount: DECIMAL(20, 4),
     created_at: BIGINT,
     updated_at: BIGINT,
@@ -65,6 +66,27 @@ module.exports = app => {
       fields: ["charge_id", "user_id"]
     }],
     classMethods: {
+      fetchExpiredChargeList(userId, t) {
+        return this.findAll({
+          where: {
+            $and: [{
+              expired: 'N',
+            }, {
+              user_id: userId,
+            }, {
+              amount: {
+                $gt: 0,
+              },
+            }, {
+              expired_at: {
+                $gte: Date.now(),
+              },
+            }],
+          },
+          order: ['expired_at'],
+          transaction: t,
+        })
+      },
       fetchCharge(id, type, limit, offset) {
         const where = {
           user_id: id,

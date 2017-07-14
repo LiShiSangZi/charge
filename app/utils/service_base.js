@@ -204,7 +204,7 @@ module.exports = (app) => {
         if (isNaN(total)) {
           total = 0;
         }
-        const b = await ctx.service.account.getBalance(account);
+        const b = await this.ctx.service.account.getBalance(account);
         const balance = parseFloat(b) - total;
 
         if (balance - estimatePrice - minBalance < 0) {
@@ -325,7 +325,7 @@ module.exports = (app) => {
       }
       for (let k in users) {
         const user = users[k];
-        await ctx.service.account.setAccount(user, {
+        await this.ctx.service.account.setAccount(user, {
           transaction: t,
         });
       }

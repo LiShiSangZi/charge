@@ -10,6 +10,7 @@ module.exports = app => {
     },
 
     async task(ctx) {
+      console.log('start task');
       const nowNum = Date.now();
 
       const users = await ctx.app.model.Account.listAccountMap();
@@ -34,7 +35,7 @@ module.exports = app => {
       const nowDateTimestamp = nowDate.getTime();
 
       const t = await ctx.app.model.transaction();
-
+      console.log('Fetch transaction done');
       for (let index = 0; index < deducts.length; index++) {
         const deduct = deducts[index];
         const order = orders[deduct.order_id];
@@ -75,22 +76,44 @@ module.exports = app => {
           user, false, newDeduct, t);
 
       }
-
-      for (let proIndex = 0; proIndex < projects.length; proIndex++) {
-        const proj = projects[proIndex];
+      console.log('loop money');
+      const projectKeys = projects.keys();
+      let nextProjectKey = projectKeys.next();
+      while (nextProjectKey && nextProjectKey.value) {
+        const k = nextProjectKey.value;
+        const proj = projects.get(k);
         await proj.save({
           transaction: t,
         });
+        nextProjectKey = projectKeys.next();
       }
-      for (let userIndex = 0; userIndex < users.length; userIndex++) {
-        const user = users[userIndex];
-
+      const userKeys = users.keys();
+      let nextUserKey = userKeys.next();
+      while (nextUserKey && nextUserKey.value) {
+        const k = nextUserKey.value;
+        const user = users.get(k);
         await ctx.service.account.setAccount(user, {
           transaction: t,
         });
+        nextUserKey = userKeys.next();
       }
-      t.commit();
 
+      // for (let proIndex = 0; proIndex < projects.length; proIndex++) {
+      //   const proj = projects[proIndex];
+      //   await proj.save({
+      //     transaction: t,
+      //   });
+      // }
+      // for (let userIndex = 0; userIndex < users.length; userIndex++) {
+      //   const user = users[userIndex];
+      //   console.log(user);
+      //   await ctx.service.account.setAccount(user, {
+      //     transaction: t,
+      //   });
+      // }
+      console.log('start commit');
+      await t.commit();
+      console.log('commit done');
       // Remove the frozen data more than an hour.
       const critical = Date.now() - 3600000;
       await ctx.app.model.Frozen.destroy({

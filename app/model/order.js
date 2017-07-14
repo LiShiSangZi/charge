@@ -21,53 +21,7 @@ module.exports = app => {
     BIGINT,
   } = app.Sequelize;
 
-
-  const writeData = (ins, created) => {
-    const travelInstance = (instance) => {
-      if (instance._changed) {
-        const attr = {};
-        let changed = false;
-        Object.keys(instance._changed).forEach(key => {
-          if (key == 'total_price') {
-            return;
-          }
-          changed = true;
-          attr[key] = instance.dataValues[key];
-        });
-        if (changed) {
-          attr.created = created === true;
-          app.model.Snapshot.create(attr).then(r => {
-          });
-        }
-      }
-    }
-    if (ins instanceof Array) {
-      ins.forEach(travelInstance);
-    } else {
-      travelInstance(ins);
-    }
-  };
-
-  class OrderModel extends ModelBase {
-    beforeBulkCreate(instance) {
-      super.beforeBulkCreate(instance);
-      writeData(instance);
-    }
-    beforeCreate(instance) {
-      super.beforeCreate(instance);
-      writeData(instance);
-    }
-    beforeUpdate(instance) {
-      super.beforeUpdate(instance);
-      writeData(instance);
-    }
-    beforeSave(instance) {
-      super.beforeSave(instance);
-      writeData(instance);
-    }
-  }
-
-  const hooks = new OrderModel();
+  const hooks = new ModelBase();
 
   return app.model.define('order', {
     id: {
@@ -215,7 +169,6 @@ module.exports = app => {
             }
           }
         });
-        console.log(res);
         const dict = {};
         res.forEach(order => {
           dict[order.order_id] = order;
