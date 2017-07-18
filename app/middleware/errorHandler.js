@@ -11,7 +11,7 @@ module.exports = (options, app) => {
       let {status, message, requestUrl, responseError} = getErrResObj(e.response);
 
       if (!status) {
-        status = 500;
+        status = e.status || 500;
       }
       if (!message && e.message) {
         message = e.message;
