@@ -39,6 +39,14 @@ module.exports = app => {
   app.post(`/${APIVERSION}/settings`, app.middlewares.adminAuth(), 'setting.create');
 
   /**
+   * API for the gift cards.
+   */
+  app.post(`/${APIVERSION}/cards`, app.middlewares.adminAuth(), 'card.create');
+  app.get(`/${APIVERSION}/cards`, app.middlewares.adminAuth(), 'card.list');
+  app.post(`/${APIVERSION}/cards/charge`, 'card.charge');
+  app.get(`/${APIVERSION}/cards/:id`, 'card.show');
+
+  /**
    * API for the charge record.
    */
   app.get(`/${APIVERSION}/accounts/charges/:userId`, app.middlewares.userAuth(), 'charge.list');

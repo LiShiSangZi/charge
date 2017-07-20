@@ -10,7 +10,8 @@ module.exports = app => {
     },
 
     async task(ctx) {
-      console.log('start task');
+      const start = Date.now();
+      ctx.logger.log(`Start task at ${new Date().getLocaleString()}`);
       const nowNum = Date.now();
 
       const users = await ctx.app.model.Account.listAccountMap();
@@ -35,7 +36,6 @@ module.exports = app => {
       const nowDateTimestamp = nowDate.getTime();
 
       const t = await ctx.app.model.transaction();
-      console.log('Fetch transaction done');
       for (let index = 0; index < deducts.length; index++) {
         const deduct = deducts[index];
         const order = orders[deduct.order_id];
@@ -76,7 +76,6 @@ module.exports = app => {
           user, false, newDeduct, t);
 
       }
-      console.log('loop money');
       const projectKeys = projects.keys();
       let nextProjectKey = projectKeys.next();
       while (nextProjectKey && nextProjectKey.value) {
@@ -111,9 +110,7 @@ module.exports = app => {
       //     transaction: t,
       //   });
       // }
-      console.log('start commit');
       await t.commit();
-      console.log('commit done');
       // Remove the frozen data more than an hour.
       const critical = Date.now() - 3600000;
       await ctx.app.model.Frozen.destroy({
@@ -123,6 +120,7 @@ module.exports = app => {
           },
         },
       });
+      ctx.logger.log(`Schedule audit is done with time ${Date.now() - start}`);
     }
   }
 }
