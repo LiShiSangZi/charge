@@ -22,8 +22,11 @@ module.exports = (app) => {
         "balance": resultData.balance - prevData.balance,
         "reward_value": resultData.reward_value - prevData.reward_value,
       };
-      if (o.balance === 0 && o.reward_value === 0) {
-        return;
+      if ((o.balance === 0 && o.reward_value === 0) ||
+        (o.balance < 0) || (o.reward_value < 0)) {
+        // There is no expense.
+        // TODO: In third party account system, will post the request if balance is more than 0.
+        return await account.save(opt);
       }
       const charges = await this.ctx.model.Charge.fetchExpiredChargeList(o.user_id, t);
 
@@ -52,7 +55,7 @@ module.exports = (app) => {
         });
       }
 
-      return account.save(opt);
+      return await account.save(opt);
     }
   }
   return AccountService;

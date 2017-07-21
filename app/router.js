@@ -43,7 +43,7 @@ module.exports = app => {
    */
   app.post(`/${APIVERSION}/cards`, app.middlewares.adminAuth(), 'card.create');
   app.get(`/${APIVERSION}/cards`, app.middlewares.adminAuth(), 'card.list');
-  app.post(`/${APIVERSION}/cards/charge`, 'card.charge');
+  app.post(`/${APIVERSION}/cards/:id/charge`, 'card.charge');
   app.get(`/${APIVERSION}/cards/:id`, 'card.show');
 
   /**

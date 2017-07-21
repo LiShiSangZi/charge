@@ -82,11 +82,12 @@ module.exports = app => {
       /**
        * Get account by userId.
        */
-      async getAccountById(id) {
+      async getAccountById(id, t) {
         return await this.findOne({
           where: {
             user_id: id,
-          }
+          },
+          transaction: t,
         }, {
           attributes: [
             'user_id', 'balance', 'consumption', 'currency', 'level',
