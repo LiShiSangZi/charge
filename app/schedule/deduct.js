@@ -11,7 +11,7 @@ module.exports = app => {
 
     async task(ctx) {
       const start = Date.now();
-      ctx.logger.log(`Start task at ${new Date().getLocaleString()}`);
+      ctx.logger.log(`Start task at ${new Date().toLocaleDateString()}`);
       const nowNum = Date.now();
 
       const users = await ctx.app.model.Account.listAccountMap();
