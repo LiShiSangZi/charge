@@ -148,7 +148,14 @@ exports.list = async(ctx) => {
   const limit = parseInt(ctx.query.limit, 10) || 10;
   const offset = parseInt(ctx.query.offset, 10) || 0;
 
-  const u = ctx.query.used;
+  let u = ctx.query.used;
+
+  let expire_date = parseInt(ctx.query.expire_date, 10);
+  if (isNaN(expire_date)) {
+    expire_date = undefined;
+  } else {
+    u = 'false';
+  }
 
   const o = {
     limit,
@@ -156,6 +163,7 @@ exports.list = async(ctx) => {
   }
   if (typeof u !== 'undefined') {
     let used;
+    // if expire_date is specific, will query card that is not used.
     if (u === 'true') {
       used = true;
     } else {
@@ -164,6 +172,12 @@ exports.list = async(ctx) => {
     o.where = {
       used,
     };
+
+    if (expire_date) {
+      o.where.expire_date = {
+        $gt: expire_date,
+      };
+    }
   }
 
 
