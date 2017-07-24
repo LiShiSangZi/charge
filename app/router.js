@@ -45,6 +45,7 @@ module.exports = app => {
   app.get(`/${APIVERSION}/cards`, app.middlewares.adminAuth(), 'card.list');
   app.post(`/${APIVERSION}/cards/:id/charge`, 'card.charge');
   app.get(`/${APIVERSION}/cards/:id`, 'card.show');
+  app.delete(`/${APIVERSION}/cards/:id`, app.middlewares.adminAuth(), 'card.delete');
 
   /**
    * API for the charge record.

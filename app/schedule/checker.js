@@ -12,3 +12,16 @@
  */
 
 
+
+module.exports = app => {
+  return {
+    schedule: {
+      cron: `0 * * * *`,
+      // cron: `* * * * *`,
+      type: 'worker',
+      disabled: true,
+    },
+    async task(ctx) {
+    }
+  };
+};

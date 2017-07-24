@@ -16,6 +16,34 @@ exports.create = async(ctx) => {
   };
 };
 
+exports.delete = async(ctx) => {
+  const id = ctx.params.id;
+  if (typeof id === 'undefined') {
+    ctx.throw(400, 'The id is required!');
+  }
+  const t = await ctx.model.transaction();
+  const c = await ctx.model.Card.findOne({
+    where: {
+      card_id: id,
+    },
+    transaction: t,
+  });
+  if (!c) {
+    ctx.throw(404);
+    t.commit();
+    return;
+  } else if (c.used || Date.now() > c.expire_date) {
+    ctx.throw(409, 'The gift card is already used or expired!');
+    t.commit();
+    return;
+  }
+  await c.destroy({
+    transaction: t,
+  });
+  t.commit();
+  ctx.status = 202;
+};
+
 exports.charge = async(ctx) => {
   const id = ctx.params.id;
   if (typeof id === 'undefined') {
@@ -30,8 +58,8 @@ exports.charge = async(ctx) => {
   });
   if (!c) {
     ctx.throw(404);
-  } else if (c.used) {
-    ctx.throw(409, 'The gift card is already used!');
+  } else if (c.used || Date.now() > c.expire_date) {
+    ctx.throw(409, 'The gift card is already used or expired!');
   } else {
     c.used = true;
     c.charge_date = Date.now();
@@ -120,10 +148,26 @@ exports.list = async(ctx) => {
   const limit = parseInt(ctx.query.limit, 10) || 10;
   const offset = parseInt(ctx.query.offset, 10) || 0;
 
-  const c = await ctx.model.Card.findAll({
+  const u = ctx.query.used;
+
+  const o = {
     limit,
     offset,
-  });
+  }
+  if (typeof u !== 'undefined') {
+    let used;
+    if (u === 'true') {
+      used = true;
+    } else {
+      used = false;
+    }
+    o.where = {
+      used,
+    };
+  }
+
+
+  const c = await ctx.model.Card.findAll(o);
   const cards = c.map(card => {
     const o = Object.assign({}, card.dataValues);
     o.expire_date = new Date(o.expire_date);
