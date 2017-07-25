@@ -4,15 +4,24 @@ exports.create = async(ctx) => {
   const body = ctx.request.body;
   const expire_date = body.expireDate || Date.now() + 30 * 3600000 * 24;
   const amount = body.amount || 50;
-  let card = await ctx.model.Card.create({
-    expire_date,
-    amount,
+  const count = body.count || 1;
+  const list = [];
+  for (let i = 0; i < count; i++) {
+    list[i] = {
+      expire_date,
+      amount,
+    };
+  }
+  let cards = await ctx.model.Card.bulkCreate(list);
+  cards = cards.map(card => {
+    const c = Object.assign({}, card.dataValues);
+    c.expire_date = new Date(c.expire_date);
+    delete c['created_at'];
+    delete c['updated_at'];
+    return c;
   });
-  card = card.dataValues;
-  delete card['created_at'];
-  delete card['updated_at'];
   ctx.body = {
-    card,
+    cards,
   };
 };
 

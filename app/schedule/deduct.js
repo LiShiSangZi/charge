@@ -11,7 +11,7 @@ module.exports = app => {
 
     async task(ctx) {
       const start = Date.now();
-      ctx.logger.log(`Start task at ${new Date().toLocaleDateString()}`);
+      ctx.logger.info(`Start task at ${new Date().toLocaleDateString()}`);
       const nowNum = Date.now();
 
       const users = await ctx.app.model.Account.listAccountMap();
@@ -120,7 +120,7 @@ module.exports = app => {
           },
         },
       });
-      ctx.logger.log(`Schedule audit is done with time ${Date.now() - start}`);
+      ctx.logger.info(`Schedule audit is done with time ${Date.now() - start}`);
     }
   }
 }
