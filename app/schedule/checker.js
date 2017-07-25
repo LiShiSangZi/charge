@@ -10,14 +10,10 @@
  * Step 5: Call the callback URL to user for the balance issue.
  * Step 6: Kill the resource if user still not response.
  */
-
-
-
 module.exports = app => {
   return {
     schedule: {
       cron: `0 * * * *`,
-      // cron: `* * * * *`,
       type: 'worker',
       disabled: true,
     },

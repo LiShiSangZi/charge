@@ -11,7 +11,7 @@ module.exports = app => {
 
     async task(ctx) {
       const start = Date.now();
-      ctx.logger.info(`Start task at ${new Date().toLocaleDateString()}`);
+      ctx.logger.info(`Schedule start task!`);
       const nowNum = Date.now();
 
       const users = await ctx.app.model.Account.listAccountMap();
@@ -97,19 +97,6 @@ module.exports = app => {
         nextUserKey = userKeys.next();
       }
 
-      // for (let proIndex = 0; proIndex < projects.length; proIndex++) {
-      //   const proj = projects[proIndex];
-      //   await proj.save({
-      //     transaction: t,
-      //   });
-      // }
-      // for (let userIndex = 0; userIndex < users.length; userIndex++) {
-      //   const user = users[userIndex];
-      //   console.log(user);
-      //   await ctx.service.account.setAccount(user, {
-      //     transaction: t,
-      //   });
-      // }
       await t.commit();
       // Remove the frozen data more than an hour.
       const critical = Date.now() - 3600000;
@@ -120,7 +107,7 @@ module.exports = app => {
           },
         },
       });
-      ctx.logger.info(`Schedule audit is done with time ${Date.now() - start}`);
+      ctx.logger.info(`Schedule audit is done with time ${Date.now() - start} ms`);
     }
   }
 }
