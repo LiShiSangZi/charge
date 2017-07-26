@@ -193,8 +193,8 @@ exports.list = async(ctx) => {
   }
 
 
-  const c = await ctx.model.Card.findAll(o);
-  const cards = c.map(card => {
+  const c = await ctx.model.Card.findAndCountAll(o);
+  const cards = c.rows.map(card => {
     const o = Object.assign({}, card.dataValues);
     o.expire_date = new Date(o.expire_date);
     if (o.charge_date) {
@@ -203,6 +203,7 @@ exports.list = async(ctx) => {
     return o;
   });
   ctx.body = {
+    count: c.count,
     cards,
   };
 };
