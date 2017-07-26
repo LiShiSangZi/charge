@@ -2,7 +2,10 @@
 
 exports.create = async(ctx) => {
   const body = ctx.request.body;
-  const expire_date = body.expireDate || Date.now() + 30 * 3600000 * 24;
+  let expire_date = body.expireDate || Date.now() + 30 * 3600000 * 24;
+  const d = new Date(expire_date);
+  d.setHours(23, 59, 59, 999);
+  expire_date = d.getTime();
   const amount = body.amount || 50;
   const count = body.count || 1;
   const list = [];
