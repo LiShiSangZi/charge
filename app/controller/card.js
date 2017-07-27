@@ -174,7 +174,7 @@ exports.list = async(ctx) => {
   const o = {
     limit,
     offset,
-    order: ['updated_at', 'DESC'],
+    order: [['updated_at', 'DESC']],
   }
   if (typeof u !== 'undefined') {
     let used;
