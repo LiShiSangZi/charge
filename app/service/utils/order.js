@@ -40,7 +40,7 @@ module.exports = (app) => {
       const lastUpdate = Math.floor(deduct.created_at.getTime() / 1000);
       const duration = now - lastUpdate;
       const totalCharge = duration * priceInSec;
-      const chMoney = totalCharge - deduct.get('money');
+      let chMoney = totalCharge - deduct.get('money');
       if (chMoney < 0) {
         chMoney = 0;
       }
