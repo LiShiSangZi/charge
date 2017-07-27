@@ -3,12 +3,25 @@
 exports.create = async(ctx) => {
   const body = ctx.request.body;
   let expire_date = body.expireDate || Date.now() + 30 * 3600000 * 24;
+  if (expire_date < Date.now()) {
+    ctx.throw(400, 'The expire date should not earlier than now!');
+  }
   const d = new Date(expire_date);
   const remark = body.remark;
+  if (remark.length > 64) {
+    ctx.throw(400, 'The remark length should less than 64!');
+  }
+  
   d.setHours(23, 59, 59, 999);
   expire_date = d.getTime();
   const amount = body.amount || 50;
+  if (amount < 1) {
+    ctx.throw(400, 'The amount should be positive!');
+  }
   const count = body.count || 1;
+  if (count < 1) {
+    ctx.throw(400, 'The amount should be positive!');
+  }
   const list = [];
   for (let i = 0; i < count; i++) {
     list[i] = {
