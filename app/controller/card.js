@@ -4,6 +4,7 @@ exports.create = async(ctx) => {
   const body = ctx.request.body;
   let expire_date = body.expireDate || Date.now() + 30 * 3600000 * 24;
   const d = new Date(expire_date);
+  const remark = body.remark;
   d.setHours(23, 59, 59, 999);
   expire_date = d.getTime();
   const amount = body.amount || 50;
@@ -13,6 +14,7 @@ exports.create = async(ctx) => {
     list[i] = {
       expire_date,
       amount,
+      remark,
     };
   }
   let cards = await ctx.model.Card.bulkCreate(list);
@@ -172,6 +174,7 @@ exports.list = async(ctx) => {
   const o = {
     limit,
     offset,
+    order: ['updated_at', 'DESC'],
   }
   if (typeof u !== 'undefined') {
     let used;

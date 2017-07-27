@@ -47,6 +47,7 @@ module.exports = app => {
       allowNull: false,
       defaultValue: false,
     },
+    remark: STRING(64),
     charge_date: BIGINT,
     charge_id: UUID,
     charge_user: STRING(32),
