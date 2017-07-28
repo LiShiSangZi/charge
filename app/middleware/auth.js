@@ -16,6 +16,10 @@ module.exports = options => {
       }
 
       const header = req.headers;
+      if (typeof header['x-auth-token'] === 'undefined') {
+        ctx.throw(401);
+        return;
+      }
       const o = await ctx.service.common.getTokenAndEndpoint(opt);
       const res = await ctx.curl(`${o.endpoint}/auth/tokens`, {
         method: 'GET',

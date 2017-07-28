@@ -1,12 +1,13 @@
 'use strict';
 
 const checkModule = require('./scripts/setup');
-
+const cluster = require('cluster');
 module.exports = async(app) => {
-  if (app.config.ignoreMiddlewareChecker !== true) {
-    checkModule(app.config.chargeModule);
-  }
   app.messenger.once('init-job', data => {
+
+    if (app.config.ignoreMiddlewareChecker !== true) {
+      checkModule(app.config.chargeModule);
+    }
 
     (async() => {
       // Mock a context:
@@ -79,11 +80,24 @@ module.exports = async(app) => {
         t.commit();
         console.log('Merge data done!');
       }
-    })().then(res => {});
+    })().then(res => {
+      // cluster.worker.exitedAfterDisconnect = true;
+      // cluster.worker.on('disconnect', () => {
+      //   cluster.worker.isDevReload = true;
+      //   // cluster.worker.kill('SIGTERM');
+      //   process.exit(0);
+      // });
+      // cluster.worker.disconnect();
+    });
   });
 
   app.beforeStart(function* () {
     app.model.sync();
     app.model.Subscription.sync();
+  });
+
+  process.on('SIGINT', (...args) => {
+    console.log('Receive SIGINT  signal!', process.pid);
+
   });
 }

@@ -16,10 +16,26 @@ try {
   config = configBase;
 }
 
-const workers = Math.min(4, require('os').cpus().length);
+const workers = Math.min(1, require('os').cpus().length);
 
 egg.startCluster({
   workers,
   baseDir: __dirname,
   port: config.port,
 });
+
+
+setTimeout(() => {
+  const cluster = require('cluster');
+  const works = cluster.workers;
+  // const keys = Object.keys(workers);
+  const work = works['1'];
+  const newWorker = cluster.fork();
+  newWorker.on('listening', () => {
+    work.on('disconnect', () => {
+      work.kill('SIGINT');
+      work.process.kill('SIGINT');
+    });
+    work.disconnect();
+  });
+}, 1000);

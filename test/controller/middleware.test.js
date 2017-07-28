@@ -17,12 +17,28 @@ describe('test/service/login.test.js', () => {
   });
   afterEach(mock.restore);
 
+  it('test liveload', async() => {
+    await new Promise((resolve, reject) => {
+      setInterval(() => {
+        for (let i = 0; i < 2; i++) {
+          app.curl('http://10.0.101.53:7001', {
+            method: 'GET',
+            dataType: 'json',
+          }).then(res => {
+            console.log(res.data.error_message);
+          });
+        }
+      }, 100);
+    });
+    console.log('gogogo');
+  });
+
   xit('test the deduct schedule', async() => {
     await app.model.sync();
     await app.runSchedule('deduct');
   });
 
-  it('process the update structure of the table', async() => {
+  xit('process the update structure of the table', async() => {
     await app.model.sync();
 
     // Ready the query interface:
