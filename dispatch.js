@@ -16,7 +16,7 @@ try {
   config = configBase;
 }
 
-const workers = Math.min(1, require('os').cpus().length);
+const workers = Math.min(4, require('os').cpus().length);
 
 egg.startCluster({
   workers,
@@ -24,18 +24,62 @@ egg.startCluster({
   port: config.port,
 });
 
+const cluster = require('cluster');
+const disconnectingMap = new Map();
 
-setTimeout(() => {
-  const cluster = require('cluster');
-  const works = cluster.workers;
-  // const keys = Object.keys(workers);
-  const work = works['1'];
-  const newWorker = cluster.fork();
-  newWorker.on('listening', () => {
-    work.on('disconnect', () => {
-      work.kill('SIGINT');
-      work.process.kill('SIGINT');
+fs.watchFile(path.join(__dirname, 'package.json'), (evt, filename) => {
+  const server = cluster.fork();
+  server.once('listening', () => {
+    const p = [];
+
+    for (let id in cluster.workers) {
+      if (id === server.id.toString()) {
+        continue;
+      }
+      const promise = new Promise((resolve, reject) => {
+
+        const w = cluster.workers[id];
+        w.on('disconnect', () => {
+          console.log(`Process ${w.process.pid} disconnected. Killing...`);
+          w.kill('SIGTERM');
+          setTimeout(() => {
+            w.process.kill('SIGTERM');
+            resolve();
+          }, 100);
+          console.log(`Process ${w.process.pid} kill action committed!`);
+          disconnectingMap.delete(id);
+        });
+        console.log(`Disconnecting process ${w.process.pid}...`);
+
+        w.exitedAfterDisconnect = true;
+
+        w.disconnect();
+        disconnectingMap.set(id, w);
+      });
+      p.push(promise);
+    }
+    Promise.all(p).then((...args) => {
+      console.log(args);
+      for (let i = 1; i < workers; i++) {
+        cluster.fork();
+      }
     });
-    work.disconnect();
   });
-}, 1000);
+});
+
+process.on('exit', () => {
+  // Loop any disconnecting worker and kill them directly.
+  const workers = cluster.workers;
+  disconnectingMap.forEach((w, k) => {
+    console.log(k);
+    try {
+      w.kill('SIGTERM');
+      setTimeout(() => {
+        w.process.kill('SIGTERM');
+        resolve();
+      }, 100);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+});

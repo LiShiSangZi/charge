@@ -2,6 +2,8 @@
 
 const path = require('path');
 
+exports.development = false;
+
 exports.security = {
   enable: false
 };
