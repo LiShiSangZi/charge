@@ -99,6 +99,7 @@ exports.charge = async(ctx) => {
       const query = {
         "type": "gift card",
         "operator": ctx.user.id,
+        "amount": c.amount,
       };
       const chargeRec = await ctx.app.model.Charge.create(query, {
         transaction: t,
