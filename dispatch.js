@@ -71,12 +71,10 @@ process.on('exit', () => {
   // Loop any disconnecting worker and kill them directly.
   const workers = cluster.workers;
   disconnectingMap.forEach((w, k) => {
-    console.log(k);
     try {
       w.kill('SIGTERM');
       setTimeout(() => {
         w.process.kill('SIGTERM');
-        resolve();
       }, 100);
     } catch (e) {
       console.log(e);

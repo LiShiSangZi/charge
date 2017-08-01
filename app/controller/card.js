@@ -113,20 +113,13 @@ exports.charge = async(ctx) => {
         const addValue = c.amount;
         account.balance += addValue;
 
-        await ctx.service.account.setAccount(account, {
-          transaction: t,
-        });
-
-        if (account.reward_value === null) {
+        if (typeof account.reward_value !== 'number') {
           account.reward_value = addValue;
         } else {
           account.reward_value += addValue;
         }
-        if (account.reward_value < 0) {
-          account.reward_value = 0;
-        }
 
-        account.save({
+        await ctx.service.account.setAccount(account, {
           transaction: t,
         });
       }
