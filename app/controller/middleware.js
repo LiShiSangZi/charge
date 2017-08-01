@@ -75,12 +75,16 @@ async function preOperationData(ctx, module, request_id, request_headers,
     "phase": phase,
     "statusCode": status_code,
   };
+
   if (service && service[module] && service[module][opt.tag]) {
-    const res = await ctx.service[module][opt.tag][request_method](opt);
+    const f = ctx.service[module][opt.tag][request_method];
+    if (typeof f === 'function') {
+      await ctx.service[module][opt.tag][request_method](opt);
+    }
   } else if (service && service[module] && typeof ctx.service[module][request_method] === 'function') {
-    const res = await ctx.service[module][request_method](opt);
+    await ctx.service[module][request_method](opt);
   } else {
-    const res = await ctx.service.common[request_method](opt);
+    await ctx.service.common[request_method](opt);
   }
 
 }
@@ -127,16 +131,16 @@ exports.catch = async(ctx) => {
   };
   const module = ctx.params.module;
   // try {
-    if (o.response_status) {
-      const statusCode = parseInt(o.response_status, 10);
-      await preOperationData(ctx, module, request_id, request_headers,
-        request_method, request_url, request_body, response_status, response_body, 'after', statusCode);
-    } else {
-      await preOperationData(ctx, module, request_id, request_headers,
-        request_method, request_url, request_body, response_status, response_body, 'before');
-    }
+  if (o.response_status) {
+    const statusCode = parseInt(o.response_status, 10);
+    await preOperationData(ctx, module, request_id, request_headers,
+      request_method, request_url, request_body, response_status, response_body, 'after', statusCode);
+  } else {
+    await preOperationData(ctx, module, request_id, request_headers,
+      request_method, request_url, request_body, response_status, response_body, 'before');
+  }
 
-    ctx.body = 'Done';
+  ctx.body = 'Done';
   // } catch (e) {
   //   let code = 400;
   //   switch (e.message) {
