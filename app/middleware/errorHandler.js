@@ -13,6 +13,9 @@ module.exports = (options, app) => {
       if (!status) {
         status = e.status || 500;
       }
+      if (status < 1) {
+        status = 500;
+      }
       if (!message && e.message) {
         message = e.message;
       } else {
