@@ -22,64 +22,82 @@ const exec = async() => {
   await app.ready();
   await app.model.sync();
   const ctx = app.mockContext();
-  const t = await ctx.app.model.transaction();
-
+  const t = await ctx.app.model.transaction({autocommit: false});
   const name = await ctx.service.neutron.router.getProductName('neutron', 'router');
   const product = await ctx.model.Product.findProduct(region, name);
-
-  if (!product) {
-    return console.log('no product of router.');
-  }
-  // Step1: Close all the router's order.
-  ctx.params = ctx.params || {};
-  ctx.params.product_id = product.product_id;
-
   const toHandleOrders = await ctx.model.Order.findOrderByProductId(product.product_id);
-  ctx.logger.info(toHandleOrders.length + ' running router orders will be closed...');
 
-  const oldOrders = await ctx.service.product.closeOrders(ctx, t);
+  const toReturnMoney = {};
+  const toDeleteOrders = []; let count = 0;
+  toHandleOrders.forEach(s => {
+    if (!s.resource_name) {
+      toReturnMoney[s.user_id] = toReturnMoney[s.user_id] || 0;
+      if (s.total_price > 0) {
+        toReturnMoney[s.user_id] += s.total_price;
+      }
+      toDeleteOrders.push(s.order_id);
+    }
+  });
 
-  const deletedOrders = oldOrders.filter(s => s.status === 'deleted');
-  const deletedOrderIds = oldOrders.map(s => s.order_id);
-  const deleted = toHandleOrders.reduce((p, s) => {
-    return p && (deletedOrderIds.indexOf(s.order_id) > -1);
-  }, true);
-  if (deleted) {
-    ctx.logger.info('all running router orders have been closed!');
-  } else {
+  try {
+    console.log('delete all ' + toDeleteOrders.length + ' invalid orders...');
+    const num1 = await ctx.model.Order.destroy({
+      where: {
+        order_id: toDeleteOrders,
+      },
+      transaction: t,
+    });
+    console.log(num1 + ' deleted.');
+
+    console.log('delete all invalid deducts releted to above orders...');
+    const num2 = await ctx.model.Deduct.destroy({
+      where: {
+        order_id: toDeleteOrders,
+      },
+      transaction: t,
+    });
+    console.log(num2 + ' deleted.');
+
+    const now = Date.now();
+    for (let user_id of Object.keys(toReturnMoney)) {
+      if (user_id && toReturnMoney[user_id]) {
+
+        console.log('update account of ' + user_id + ' ...');
+        await ctx.model.Account.update({
+          reward_value: ctx.model.Sequelize.literal('`reward_value` + ' + toReturnMoney[user_id]),
+          consumption: ctx.model.Sequelize.literal('`consumption` - ' + toReturnMoney[user_id]),
+          balance: ctx.model.Sequelize.literal('`balance` + ' + toReturnMoney[user_id]),
+          updated_at: now,
+        }, {
+          where: {user_id: user_id},
+          transaction: t,
+        });
+        console.log('updated.');
+
+        console.log('create compensation charge of ' + user_id + ' ...');
+        await ctx.model.Charge.create({
+          come_from: 'system',
+          // operator: '',
+          user_id: user_id,
+          type: 'compensation',
+          // expired: '',
+          // consumption: '',
+          amount: toReturnMoney[user_id],
+          created_at: now,
+          updated_at: now,
+        }, {
+          transaction: t,
+        });
+        console.log('created.');
+      }
+    };
+
+    await t.commit();
+  } catch (e) {
     await t.rollback();
-    ctx.logger.warn('excuted rollback, since running router orders have not been closed totally.');
-    process.exit(0);
+    throw e;
   }
 
-  const rids = [...new Set(deletedOrders.map(s => s.resource_id))];
-  ctx.logger.info('after clarified, ' + rids.length + ' orders of resources should be created next...');
-
-  // Step2: Create new order according to the user's resource.
-  const body = {
-    region_id: region,
-    unit_price: JSON.parse(product.unit_price),
-    product_id: product.product_id,
-  };
-
-  const [module, tag, ...rest] = product.name.split(':');
-  const resources = await ctx.service.product.buildOrders(ctx, body, module, tag, rest, t);
-
-  const newOrders = resources.orders;
-  const _rids = newOrders.map(s => s.resource_id);
-  const created = rids.reduce((p, s) => {
-    return p && (_rids.indexOf(s) > -1);
-  }, true);
-  if (created) {
-    ctx.logger.info('all orders have been created successfully!');
-  } else {
-    await t.rollback();
-    ctx.logger.warn('excuted rollback, since some orders have not been created.');
-    process.exit(0);
-  }
-
-  await t.commit();
-  return resources;
 };
 
 const run = exec().then(r => {
