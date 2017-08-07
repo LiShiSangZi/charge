@@ -17,7 +17,7 @@ describe('test/service/login.test.js', () => {
   });
   afterEach(mock.restore);
 
-  it('test liveload', async() => {
+  xit('test liveload', async() => {
     await new Promise((resolve, reject) => {
       setInterval(() => {
         for (let i = 0; i < 2; i++) {
@@ -38,7 +38,7 @@ describe('test/service/login.test.js', () => {
     await app.runSchedule('deduct');
   });
 
-  xit('process the update structure of the table', async() => {
+  it('process the update structure of the table', async() => {
     await app.model.sync();
 
     // Ready the query interface:

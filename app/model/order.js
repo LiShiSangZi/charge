@@ -130,6 +130,9 @@ module.exports = app => {
         });
       },
       async findAndCounts(opt, limit, offset, t) {
+        opt.type = {
+          $not: 'router-archive',
+        };
         return await this.findAndCount({
           attributes: ATTRIBUTES,
           limit: limit,
