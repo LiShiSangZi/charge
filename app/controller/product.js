@@ -160,6 +160,7 @@ exports.update = async(ctx) => {
   }
 
   const t = await ctx.app.model.transaction();
+  
   // Fetch the old product to see if the price is updated.
   const oldProduct = await ctx.model.Product.findOne({
     where: params,

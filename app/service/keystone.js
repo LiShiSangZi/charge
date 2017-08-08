@@ -57,7 +57,6 @@ module.exports = app => {
     }
 
     async DELETE(opt) {
-      console.log('DELETE start', opt.requestUrl);
       if (opt.phase === 'after') {
         const url = opt.requestUrl;
         const params = this.filterURLs(url);
@@ -82,12 +81,9 @@ module.exports = app => {
 
         }
       }
-
-      console.log('DELETE end', opt.requestUrl);
     }
 
     async PUT(opt) {
-      console.log('PUT start', opt.requestUrl);
       if (opt.phase === 'after') {
         const url = opt.requestUrl;
         const params = this.filterURLs(url);
@@ -126,11 +122,9 @@ module.exports = app => {
 
         }
       }
-      console.log('PUT end', opt.requestUrl);
     }
 
     async POST(opt) {
-      console.log('POST start', opt.requestUrl);
       if (opt.phase === 'after') {
         const url = opt.requestUrl;
         const params = this.filterURLs(url);
@@ -165,7 +159,6 @@ module.exports = app => {
             break;
         }
       }
-      console.log('POST start', opt.requestUrl);
     }
 
     async fetchUsers(region) {

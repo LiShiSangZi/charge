@@ -30,6 +30,7 @@ module.exports = options => {
           'X-Subject-Token': header['x-auth-token'],
         },
       });
+
       if (res.data && res.data.token) {
         ctx.user = res.data.token.user;
         ctx.roles = res.data.token.roles;

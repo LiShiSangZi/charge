@@ -4,6 +4,7 @@ exports.detail = async(ctx) => {
   const userId = ctx.params.userId;
 
   const account = await ctx.app.model.Account.getAccountById(userId);
+
   account.balance = await ctx.service.account.getBalance(account);
   account.consumption = account.consumption.toFixed(4);
   if (account.reward_value) {

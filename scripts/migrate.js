@@ -110,6 +110,5 @@ const action = async() => {
 }
 
 action().then(() => {
-  console.log('Done');
   process.exit(0);
 });

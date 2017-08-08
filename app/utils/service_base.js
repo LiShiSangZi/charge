@@ -214,6 +214,10 @@ module.exports = (app) => {
 
     }
 
+    getType(opt) {
+      return opt.tag;
+    }
+
     /**
      * Frozen the money before forwarding the request to backend.
      */
@@ -226,11 +230,12 @@ module.exports = (app) => {
         region: opt.region,
         project_id: opt.projectId,
         domain_id: opt.domainId,
-        type: opt.tag,
+        type: this.getType(opt),
         product_id: productId,
         request_id: opt.requestId,
         user_id: userId,
       }
+
       const tempOrder = await this.ctx.model.Frozen.create(attr);
       if (!tempOrder) {
         throw new Error('Error: the billing system can not save your order!');

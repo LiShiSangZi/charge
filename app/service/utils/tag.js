@@ -17,6 +17,8 @@ module.exports = (app) => {
         }
         if (pathArray[0] === 'floatingips.json') {
           return 'floatingip';
+        } else if (pathArray[0] === 'volumes_boot') {
+          return 'volumesboot';
         }
       }
       return pathArray[0].replace(/(e*)s$/, '$1').replace(/\.json$/, '');

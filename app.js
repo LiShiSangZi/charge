@@ -78,7 +78,6 @@ module.exports = async(app) => {
           }
         }
         t.commit();
-        console.log('Merge data done!');
       }
     })().then(res => {
       // cluster.worker.exitedAfterDisconnect = true;

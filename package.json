@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "egg-bin dev",
     "migrate": "egg-bin test",
-    "fix-router": "node scripts/fix-router.js"
+    "fix-router": "node scripts/fix-router.js",
+    "fix-server": "node scripts/fix-server.js"
   },
   "devDependencies": {
     "egg-bin": "^3.3.0"
