@@ -98,7 +98,7 @@ const exec = async() => {
   routers.forEach(r => {
     routerObjMap.set(r.id, r);
   });
-  const projectMap = await ctx.model.Project.listProductMap();
+  const projectMap = await ctx.model.Project.listProductMap(t);
   const toCloseOrders = [];
   const toCreateOrders = [];
   const toCreateDeducts = [];

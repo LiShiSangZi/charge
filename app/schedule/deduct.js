@@ -10,6 +10,11 @@ module.exports = app => {
     },
 
     async task(ctx) {
+
+      if (triggerMin === 0) {
+        await app.runSchedule('checker');
+      }
+
       const start = Date.now();
       ctx.logger.info(`Schedule start task!`);
       const nowNum = Date.now();

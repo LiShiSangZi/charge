@@ -73,8 +73,7 @@ async function closeOrders(ctx, transaction) {
   return res;
 }
 
-async function buildOrders(ctx, reqBody, module, tag, rest, t) {
-  const region = reqBody.region_id || 'RegionOne';
+function getService(ctx, module, tag) {
   let service = ctx.service;
 
   if (service && service[module] && service[module][tag]) {
@@ -82,6 +81,12 @@ async function buildOrders(ctx, reqBody, module, tag, rest, t) {
   } else {
     service = ctx.service.common;
   }
+  return service;
+}
+
+async function buildOrders(ctx, reqBody, module, tag, rest, t) {
+  const region = reqBody.region_id || 'RegionOne';
+  let service = getService(ctx, module, tag);
 
   /**
    * Fetch all the project list so that we can provide the domain_id and project_id for order.
@@ -172,6 +177,7 @@ module.exports = app => {
   Object.assign(ProductService.prototype, {
     closeOrders,
     buildOrders,
+    getService,
   });
   return ProductService;
 };
