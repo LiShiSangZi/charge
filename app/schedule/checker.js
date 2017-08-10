@@ -283,26 +283,39 @@ module.exports = app => {
         transaction: t,
       });
 
-      await ctx.model.Order.update({
-        updated_at: createTime,
-        status: 'deleted',
-      }, {
-        where: {
-          order_id: {
-            $in: toDelete,
+      if (toDelete.length > 0) {
+        await ctx.model.Order.update({
+          updated_at: createTime,
+          status: 'deleted',
+        }, {
+          where: {
+            order_id: {
+              $in: toDelete,
+            },
           },
-        },
-        transaction: t,
-      });
-      // Create orders:
-      await ctx.model.Order.bulkCreate(newOrder, {
-        transaction: t,
-      });
+          transaction: t,
+        });
+        ctx.coreLogger.info(chalk.red(`checker - Delete ${toDelete.length} invalid orders.`));
+      } else {
+        ctx.coreLogger.info(chalk.green('checker - No deleted orders.'));
+      }
 
-      // Create deducts:
-      await ctx.model.Deduct.bulkCreate(newDeduct, {
-        transaction: t,
-      });
+      if (newOrder.length > 0) {
+        // Create orders:
+        await ctx.model.Order.bulkCreate(newOrder, {
+          transaction: t,
+        });
+        ctx.coreLogger.info(chalk.red(`checker - Recreate ${newOrder.length} new orders.`));
+      } else {
+        ctx.coreLogger.info(chalk.green('checker - No created orders.'));
+      }
+
+      if (newDeduct.length > 0) {
+        // Create deducts:
+        await ctx.model.Deduct.bulkCreate(newDeduct, {
+          transaction: t,
+        });
+      }
 
       await t.commit();
 
