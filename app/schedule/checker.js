@@ -237,6 +237,7 @@ module.exports = app => {
         },
         timeout: 20000,
       });
+
       const regionData = res.data;
       if (regionData.regions) {
         regions = regionData.regions.map(r => r.id);
@@ -246,7 +247,130 @@ module.exports = app => {
       const projectMap = await ctx.model.Project.listProductMap(t);
       const accountMap = await ctx.model.Account.listAccountMap(t);
 
-      const createTime = Math.round(Date.now(), 1000) * 1000;
+      const createTime = Math.round(Date.now() / 1000) * 1000;
+
+      print('Checking missing account in db...');
+      const usersRes = await ctx.curl(`${keystone[keykst]}/users`, {
+        method: 'GET',
+        dataType: 'json',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth-Token': tokenObj.token,
+        },
+        timeout: 20000,
+      });
+      if (usersRes && usersRes.data && usersRes.data.users) {
+        const users = usersRes.data.users;
+        const userData = [];
+        for (let i = 0; i < users.length; i++) {
+          const user = users[i];
+          if (!accountMap.has(user.id)) {
+            print(chalk.red(`User with id ${user.id} doe snot exists.`));
+
+            userData.push({
+              user_id: user.id,
+              domain_id: user.domain_id,
+            });
+          }
+        }
+        const result = await ctx.model.Account.bulkCreate(userData, {
+          transaction: t,
+        });
+        if (result.length > 0) {
+          print(chalk.red(`Created ${result.length} users.`));
+        } else {
+          print(chalk.green('All user are created.'));
+        }
+      }
+      print('Checking missing project in db...');
+      print('Fetching user role lists...');
+      const roleRes = await ctx.curl(`${keystone[keykst]}/roles`, {
+        method: 'GET',
+        dataType: 'json',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth-Token': tokenObj.token,
+        },
+        timeout: 20000,
+      });
+
+      if (roleRes && roleRes.data && roleRes.data.roles) {
+        const roles = roleRes.data.roles;
+        print(chalk.green(`Found ${roles.length} roles.`));
+        print(`The configured role name is: ${ctx.app.config.charge.billing_role}.`);
+        let billingOwnerRole;
+        roles.some(r => {
+          if (r.name === ctx.app.config.charge.billing_role) {
+            billingOwnerRole = r.id;
+            return true;
+          }
+        });
+
+        const assignmentRes = await ctx.curl(`${keystone[keykst]}/role_assignments?role.id=${billingOwnerRole}`, {
+          method: 'GET',
+          dataType: 'json',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': tokenObj.token,
+          },
+          timeout: 20000,
+        });
+
+        if (assignmentRes && assignmentRes.data && assignmentRes.data.role_assignments) {
+          const as = assignmentRes.data.role_assignments;
+          print(`Found ${as.length} assigments. `);
+
+          const toCreatedProject = [];
+
+          for (let idx = 0; idx < as.length; idx++) {
+            const assignment = as[idx];
+            if (!assignment.scope || !assignment.scope.project) {
+              continue;
+            }
+            const project = assignment.scope.project;
+            const projectModelData = projectMap.get(project.id);
+            if (projectModelData) {
+              if (!projectModelData.user_id || projectModelData.user_id !== assignment.user.id) {
+                print(chalk.red(`The user ${assignment.user.id} should have assignment in project ${project.id}.`));
+                projectModelData.user_id = assignment.user.id;
+                await projectModelData.save({
+                  transaction: t,
+                });
+                continue;
+              }
+            } else {
+              print(chalk.red(`The project ${project.id} should be created.`));
+
+              const p = await ctx.curl(`${keystone[keykst]}/projects/ff74d36c1c9c4eae85edf9697e1cd0b7`, {
+                method: 'GET',
+                dataType: 'json',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-Auth-Token': tokenObj.token,
+                },
+                timeout: 20000,
+              });
+
+              const projectData = p.data.project;
+
+              toCreatedProject.push({
+                user_id: assignment.user.id,
+                domain_id: projectData.domain_id,
+                project_id: project.id,
+              });
+              continue;
+            }
+          }
+
+          const created = await ctx.model.Project.bulkCreate(toCreatedProject, {
+            transaction: t,
+          });
+
+          print(`Creat ${created.length} project data.`);
+        }
+
+      }
+ 
       let toDelete = [];
       let newDeduct = [];
       let newOrder = [];
@@ -316,6 +440,7 @@ module.exports = app => {
           transaction: t,
         });
       }
+
 
       await t.commit();
 

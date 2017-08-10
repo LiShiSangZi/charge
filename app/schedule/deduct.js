@@ -15,6 +15,8 @@ module.exports = app => {
         await app.runSchedule('checker');
       }
 
+      const now = Date.now();
+
       const start = Date.now();
       ctx.logger.info(`Schedule start task!`);
       const nowNum = Date.now();
@@ -26,8 +28,6 @@ module.exports = app => {
       const orders = await ctx.app.model.Order.buildOrderDict();
 
       const deducts = await ctx.app.model.Deduct.listAll();
-
-      const now = Date.now();
       const saveCurrentTimestamp = now;
 
       const nowDate = new Date(now);
