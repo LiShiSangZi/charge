@@ -215,97 +215,21 @@ module.exports = app => {
         autocommit: false
       });
 
-      print('Find all products for use...');
-      const products = await ctx.model.Product.findAll({
-        transaction: t,
-      });
-      print(`Found ${products.length} products.`);
+      try {
 
-      print(`Find all regions...`);
-      let regions = [];
-      const tokenObj = await ctx.service.token.getToken();
-      const keystone = tokenObj.endpoint.keystone;
-      const keykst = Object.keys(keystone)[0];
-
-      const res = await ctx.curl(`${keystone[keykst]}/regions`, {
-        method: 'GET',
-        dataType: 'json',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Auth-Token': tokenObj.token,
-        },
-        timeout: 20000,
-      });
-
-      const regionData = res.data;
-      if (regionData.regions) {
-        regions = regionData.regions.map(r => r.id);
-      }
-      print(`Found ${regions.length} regions`);
-
-      const projectMap = await ctx.model.Project.listProductMap(t);
-      const accountMap = await ctx.model.Account.listAccountMap(t);
-
-      const createTime = Math.round(Date.now() / 1000) * 1000;
-
-      print('Checking missing account in db...');
-      const usersRes = await ctx.curl(`${keystone[keykst]}/users`, {
-        method: 'GET',
-        dataType: 'json',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Auth-Token': tokenObj.token,
-        },
-        timeout: 20000,
-      });
-      if (usersRes && usersRes.data && usersRes.data.users) {
-        const users = usersRes.data.users;
-        const userData = [];
-        for (let i = 0; i < users.length; i++) {
-          const user = users[i];
-          if (!accountMap.has(user.id)) {
-            print(chalk.red(`User with id ${user.id} doe snot exists.`));
-
-            userData.push({
-              user_id: user.id,
-              domain_id: user.domain_id,
-            });
-          }
-        }
-        const result = await ctx.model.Account.bulkCreate(userData, {
+        print('Find all products for use...');
+        const products = await ctx.model.Product.findAll({
           transaction: t,
         });
-        if (result.length > 0) {
-          print(chalk.red(`Created ${result.length} users.`));
-        } else {
-          print(chalk.green('All user are created.'));
-        }
-      }
-      print('Checking missing project in db...');
-      print('Fetching user role lists...');
-      const roleRes = await ctx.curl(`${keystone[keykst]}/roles`, {
-        method: 'GET',
-        dataType: 'json',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Auth-Token': tokenObj.token,
-        },
-        timeout: 20000,
-      });
+        print(`Found ${products.length} products.`);
 
-      if (roleRes && roleRes.data && roleRes.data.roles) {
-        const roles = roleRes.data.roles;
-        print(chalk.green(`Found ${roles.length} roles.`));
-        print(`The configured role name is: ${ctx.app.config.charge.billing_role}.`);
-        let billingOwnerRole;
-        roles.some(r => {
-          if (r.name === ctx.app.config.charge.billing_role) {
-            billingOwnerRole = r.id;
-            return true;
-          }
-        });
+        print(`Find all regions...`);
+        let regions = [];
+        const tokenObj = await ctx.service.token.getToken();
+        const keystone = tokenObj.endpoint.keystone;
+        const keykst = Object.keys(keystone)[0];
 
-        const assignmentRes = await ctx.curl(`${keystone[keykst]}/role_assignments?role.id=${billingOwnerRole}`, {
+        const res = await ctx.curl(`${keystone[keykst]}/regions`, {
           method: 'GET',
           dataType: 'json',
           headers: {
@@ -315,135 +239,216 @@ module.exports = app => {
           timeout: 20000,
         });
 
-        if (assignmentRes && assignmentRes.data && assignmentRes.data.role_assignments) {
-          const as = assignmentRes.data.role_assignments;
-          print(`Found ${as.length} assigments. `);
+        const regionData = res.data;
+        if (regionData.regions) {
+          regions = regionData.regions.map(r => r.id);
+        }
+        print(`Found ${regions.length} regions`);
 
-          const toCreatedProject = [];
+        const projectMap = await ctx.model.Project.listProductMap(t);
+        const accountMap = await ctx.model.Account.listAccountMap(t);
 
-          for (let idx = 0; idx < as.length; idx++) {
-            const assignment = as[idx];
-            if (!assignment.scope || !assignment.scope.project) {
-              continue;
+        const createTime = Math.round(Date.now() / 1000) * 1000;
+
+        print('Checking missing account in db...');
+        const usersRes = await ctx.curl(`${keystone[keykst]}/users`, {
+          method: 'GET',
+          dataType: 'json',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': tokenObj.token,
+          },
+          timeout: 20000,
+        });
+        if (usersRes && usersRes.data && usersRes.data.users) {
+          const users = usersRes.data.users;
+          const userData = [];
+          for (let i = 0; i < users.length; i++) {
+            const user = users[i];
+            if (!accountMap.has(user.id)) {
+              print(chalk.red(`User with id ${user.id} doe snot exists.`));
+
+              userData.push({
+                user_id: user.id,
+                domain_id: user.domain_id,
+              });
             }
-            const project = assignment.scope.project;
-            const projectModelData = projectMap.get(project.id);
-            if (projectModelData) {
-              if (!projectModelData.user_id || projectModelData.user_id !== assignment.user.id) {
-                print(chalk.red(`The user ${assignment.user.id} should have assignment in project ${project.id}.`));
-                projectModelData.user_id = assignment.user.id;
-                await projectModelData.save({
-                  transaction: t,
+          }
+          const result = await ctx.model.Account.bulkCreate(userData, {
+            transaction: t,
+          });
+          if (result.length > 0) {
+            print(chalk.red(`Created ${result.length} users.`));
+          } else {
+            print(chalk.green('All user are created.'));
+          }
+        }
+        print('Checking missing project in db...');
+        print('Fetching user role lists...');
+        const roleRes = await ctx.curl(`${keystone[keykst]}/roles`, {
+          method: 'GET',
+          dataType: 'json',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': tokenObj.token,
+          },
+          timeout: 20000,
+        });
+
+        if (roleRes && roleRes.data && roleRes.data.roles) {
+          const roles = roleRes.data.roles;
+          print(chalk.green(`Found ${roles.length} roles.`));
+          print(`The configured role name is: ${ctx.app.config.charge.billing_role}.`);
+          let billingOwnerRole;
+          roles.some(r => {
+            if (r.name === ctx.app.config.charge.billing_role) {
+              billingOwnerRole = r.id;
+              return true;
+            }
+          });
+
+          const assignmentRes = await ctx.curl(`${keystone[keykst]}/role_assignments?role.id=${billingOwnerRole}`, {
+            method: 'GET',
+            dataType: 'json',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Auth-Token': tokenObj.token,
+            },
+            timeout: 20000,
+          });
+
+          if (assignmentRes && assignmentRes.data && assignmentRes.data.role_assignments) {
+            const as = assignmentRes.data.role_assignments;
+            print(`Found ${as.length} assigments. `);
+
+            const toCreatedProject = [];
+
+            for (let idx = 0; idx < as.length; idx++) {
+              const assignment = as[idx];
+              if (!assignment.scope || !assignment.scope.project) {
+                continue;
+              }
+              const project = assignment.scope.project;
+              const projectModelData = projectMap.get(project.id);
+              if (projectModelData) {
+                if (!projectModelData.user_id || projectModelData.user_id !== assignment.user.id) {
+                  print(chalk.red(`The user ${assignment.user.id} should have assignment in project ${project.id}.`));
+                  projectModelData.user_id = assignment.user.id;
+                  await projectModelData.save({
+                    transaction: t,
+                  });
+                  continue;
+                }
+              } else {
+                print(chalk.red(`The project ${project.id} should be created.`));
+
+                const p = await ctx.curl(`${keystone[keykst]}/projects/ff74d36c1c9c4eae85edf9697e1cd0b7`, {
+                  method: 'GET',
+                  dataType: 'json',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-Auth-Token': tokenObj.token,
+                  },
+                  timeout: 20000,
+                });
+
+                const projectData = p.data.project;
+
+                toCreatedProject.push({
+                  user_id: assignment.user.id,
+                  domain_id: projectData.domain_id,
+                  project_id: project.id,
                 });
                 continue;
               }
-            } else {
-              print(chalk.red(`The project ${project.id} should be created.`));
+            }
 
-              const p = await ctx.curl(`${keystone[keykst]}/projects/ff74d36c1c9c4eae85edf9697e1cd0b7`, {
-                method: 'GET',
-                dataType: 'json',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'X-Auth-Token': tokenObj.token,
-                },
-                timeout: 20000,
-              });
+            const created = await ctx.model.Project.bulkCreate(toCreatedProject, {
+              transaction: t,
+            });
 
-              const projectData = p.data.project;
+            print(`Creat ${created.length} project data.`);
+          }
 
-              toCreatedProject.push({
-                user_id: assignment.user.id,
-                domain_id: projectData.domain_id,
-                project_id: project.id,
-              });
+        }
+
+        let toDelete = [];
+        let newDeduct = [];
+        let newOrder = [];
+
+        const productKeys = [];
+
+        for (let i = 0; i < products.length; i++) {
+          const product = products[i];
+          productKeys[i] = product.product_id;
+          for (let idx = 0; idx < regions.length; idx++) {
+            const region = regions[idx];
+            const o = await operationOrders(ctx, region, product, t,
+              projectMap, accountMap, createTime);
+            if (!o) {
               continue;
             }
+            toDelete = toDelete.concat(o.toCloseOrders);
+            newDeduct = newDeduct.concat(o.toCreateDeducts);
+            newOrder = newOrder.concat(o.toCreateOrders);
           }
-
-          const created = await ctx.model.Project.bulkCreate(toCreatedProject, {
-            transaction: t,
-          });
-
-          print(`Creat ${created.length} project data.`);
         }
 
-      }
- 
-      let toDelete = [];
-      let newDeduct = [];
-      let newOrder = [];
+        print('Updating data...');
 
-      const productKeys = [];
-
-      for (let i = 0; i < products.length; i++) {
-        const product = products[i];
-        productKeys[i] = product.product_id;
-        for (let idx = 0; idx < regions.length; idx++) {
-          const region = regions[idx];
-          const o = await operationOrders(ctx, region, product, t,
-            projectMap, accountMap, createTime);
-          if (!o) {
-            continue;
-          }
-          toDelete = toDelete.concat(o.toCloseOrders);
-          newDeduct = newDeduct.concat(o.toCreateDeducts);
-          newOrder = newOrder.concat(o.toCreateOrders);
-        }
-      }
-
-      print('Updating data...');
-
-      await ctx.model.Order.update({
-        updated_at: createTime,
-        status: 'deleted',
-      }, {
-        where: {
-          product_id: {
-            $notIn: productKeys,
-          },
-        },
-        transaction: t,
-      });
-
-      if (toDelete.length > 0) {
         await ctx.model.Order.update({
           updated_at: createTime,
           status: 'deleted',
         }, {
           where: {
-            order_id: {
-              $in: toDelete,
+            product_id: {
+              $notIn: productKeys,
             },
           },
           transaction: t,
         });
-        ctx.coreLogger.info(chalk.red(`checker - Delete ${toDelete.length} invalid orders.`));
-      } else {
-        ctx.coreLogger.info(chalk.green('checker - No deleted orders.'));
+
+        if (toDelete.length > 0) {
+          await ctx.model.Order.update({
+            updated_at: createTime,
+            status: 'deleted',
+          }, {
+            where: {
+              order_id: {
+                $in: toDelete,
+              },
+            },
+            transaction: t,
+          });
+          ctx.coreLogger.info(chalk.red(`checker - Delete ${toDelete.length} invalid orders.`));
+        } else {
+          ctx.coreLogger.info(chalk.green('checker - No deleted orders.'));
+        }
+
+        if (newOrder.length > 0) {
+          // Create orders:
+          await ctx.model.Order.bulkCreate(newOrder, {
+            transaction: t,
+          });
+          ctx.coreLogger.info(chalk.red(`checker - Recreate ${newOrder.length} new orders.`));
+        } else {
+          ctx.coreLogger.info(chalk.green('checker - No created orders.'));
+        }
+
+        if (newDeduct.length > 0) {
+          // Create deducts:
+          await ctx.model.Deduct.bulkCreate(newDeduct, {
+            transaction: t,
+          });
+        }
+
+
+        await t.commit();
+
+        print('All Done!');
+      } catch (e) {
+        await t.rollback();
       }
-
-      if (newOrder.length > 0) {
-        // Create orders:
-        await ctx.model.Order.bulkCreate(newOrder, {
-          transaction: t,
-        });
-        ctx.coreLogger.info(chalk.red(`checker - Recreate ${newOrder.length} new orders.`));
-      } else {
-        ctx.coreLogger.info(chalk.green('checker - No created orders.'));
-      }
-
-      if (newDeduct.length > 0) {
-        // Create deducts:
-        await ctx.model.Deduct.bulkCreate(newDeduct, {
-          transaction: t,
-        });
-      }
-
-
-      await t.commit();
-
-      print('All Done!');
     }
   };
 };
