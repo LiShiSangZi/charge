@@ -135,7 +135,6 @@ async function operationOrders(ctx, region, product, t,
         });
         value.forEach(o => {
           if (realOrder !== o) {
-            rec.mt++;
             toCloseOrders.push(o.order_id);
           }
         });
