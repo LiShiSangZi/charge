@@ -77,8 +77,12 @@ module.exports = app => {
             newDeduct = true;
           }
         }
+
+        const timeStampDate = new Date(now);
+        timeStampDate.setSeconds(0);
+        timeStampDate.setMilliseconds(0);
         const r = await ctx.service.utils.order.calOrder(order, deduct, project,
-          user, false, newDeduct, t);
+          user, false, newDeduct, t, timeStampDate.getTime() / 1000);
 
       }
       const projectKeys = projects.keys();

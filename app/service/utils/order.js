@@ -14,8 +14,10 @@ module.exports = (app) => {
      * @param {*UserInstance} user the related user.
      * @param {Boolean} close will close the order if true.
      * @param {Boolean} createNew will create a new deduct.
+     * @param {*Transaction} transaction db transaction.
+     * @param {Number} timestamp the timestamp in seconds.
      */
-    async calOrder(order, deduct, project, user, close, createNew, transaction) {
+    async calOrder(order, deduct, project, user, close, createNew, transaction, timestamp) {
       if (!deduct || (deduct && order.deduct_id !== deduct.deduct_id)) {
         // The deduct is not current one.
         return;
@@ -34,7 +36,7 @@ module.exports = (app) => {
       }
 
       const priceInSec = order.unit_price / priceUnit;
-      const now = Math.floor(Date.now() / 1000);
+      const now = timestamp || Math.floor(Date.now() / 1000);
 
 
       const lastUpdate = Math.floor(deduct.created_at.getTime() / 1000);
@@ -45,7 +47,7 @@ module.exports = (app) => {
         chMoney = 0;
       }
       deduct.set('money', parseFloat(totalCharge.toFixed(4)));
-      deduct.set('updated_at', now * 1000);
+      deduct.set('updated_at', (now - 1) * 1000);
 
       await deduct.save(addOpt);
       if (createNew) {
