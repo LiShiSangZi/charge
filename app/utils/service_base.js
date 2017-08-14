@@ -318,8 +318,12 @@ module.exports = (app) => {
           // Calculate the order's charge and close it.
           const newPromise = await this.ctx.service.utils.order.calOrder(order,
             deduct, project, user, true, false, t);
-          projects[project.project_id] = project;
-          users[user.user_id] = user;
+          if (project) {
+            projects[project.project_id] = project;
+          }
+          if (user) {
+            users[user.user_id] = user;
+          }
         }
       }
       for (let k in projects) {
