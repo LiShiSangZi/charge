@@ -266,7 +266,7 @@ module.exports = app => {
           for (let i = 0; i < users.length; i++) {
             const user = users[i];
             if (!accountMap.has(user.id)) {
-              print(chalk.red(`User with id ${user.id} doe snot exists.`));
+              print(chalk.red(`User with id ${user.id} does not exists.`));
 
               userData.push({
                 user_id: user.id,
@@ -342,7 +342,7 @@ module.exports = app => {
               } else {
                 print(chalk.red(`The project ${project.id} should be created.`));
 
-                const p = await ctx.curl(`${keystone[keykst]}/projects/ff74d36c1c9c4eae85edf9697e1cd0b7`, {
+                const p = await ctx.curl(`${keystone[keykst]}/projects/${project.id}`, {
                   method: 'GET',
                   dataType: 'json',
                   headers: {
@@ -352,8 +352,11 @@ module.exports = app => {
                   timeout: 20000,
                 });
 
-                const projectData = p.data.project;
+                if (p.data.error) {
+                  continue;
+                }
 
+                const projectData = p.data.project;
                 toCreatedProject.push({
                   user_id: assignment.user.id,
                   domain_id: projectData.domain_id,
