@@ -5,7 +5,9 @@
  */
 
 module.exports = options => {
-  const reg = new RegExp(options.ignoreLink.map(m => `^\/${m}`).join('|'));
+
+  const ignoreLink = ['check', 'ping'].concat(options.ignoreLink);
+  const reg = new RegExp(ignoreLink.map(m => `^\/${m}`).join('|'));
   return async(ctx, next) => {
     const req = ctx.request;
     if (!reg.test(req.url)) {

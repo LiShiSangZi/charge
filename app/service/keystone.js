@@ -53,7 +53,6 @@ module.exports = app => {
     }
 
     async GET(opt) {
-      // console.log(opt);
     }
 
     async DELETE(opt) {
@@ -116,8 +115,6 @@ module.exports = app => {
                 });
               }
             }
-
-            // console.log(project);
           }
 
         }

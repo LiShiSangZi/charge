@@ -7,6 +7,17 @@ const egg = require('egg');
 const configBase = require('./config/config.default.js');
 let env;
 let config;
+
+const args = process.argv.filter(arg => /^\-\-(.+)\=(.*)/.test(arg));
+const argObj = {};
+
+args.forEach(v => {
+  const argv = v.replace(/^\-\-/, '').split('=');
+  if (argv.length === 2) {
+    argObj[argv[0]] = argv[1];
+  }
+});
+
 try {
   env = fs.readFileSync(path.join(__dirname, 'config', 'env'));
   env = env.toString().trim();
@@ -15,6 +26,8 @@ try {
 } catch (e) {
   config = configBase;
 }
+
+config = Object.assign(config, argObj);
 
 const workers = Math.min(4, require('os').cpus().length);
 
@@ -52,7 +65,7 @@ fs.watchFile(path.join(__dirname, 'package.json'), (evt, filename) => {
         console.log(`Disconnecting process ${w.process.pid}...`);
 
         w.exitedAfterDisconnect = true;
-
+        w.send('closing');
         w.disconnect();
         disconnectingMap.set(id, w);
       });
