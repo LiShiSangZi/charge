@@ -16,6 +16,9 @@ exports.check = async(ctx) => {
   }
 };
 
-exports.ping = async (ctx) => {
-  setTimeout(() => ctx.body = process.pid, 1000);
+exports.ping = async(ctx) => {
+  await new Promise((resolve, reject) => {
+    setTimeout(() => resolve(), 3000);
+  });
+  ctx.body = process.pid
 };

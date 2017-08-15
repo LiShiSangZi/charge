@@ -13,14 +13,21 @@ const exec = async() => {
   const ctx = app.mockContext();
 
   try {
+    const pids = [];
     // Send to server and wait for the response.
     const curl = async() => {
-      const promise = ctx.curl(`http://10.0.101.53:8001/v1/test`, {
+      const promise = ctx.curl(`http://10.0.101.53:7001/ping`, {
         method: 'GET',
       });
 
       promise.then((res) => {
-        console.log(res.data.toString());
+        const pid = res.data.toString();
+        if (pids.indexOf(pid) < 0) {
+          console.log(chalk.green(pid));
+          pids.push(pid);
+        } else {
+          console.log(pid);
+        }
       });
       promise.catch(res => {
         console.log(res.errors);
