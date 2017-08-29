@@ -8,10 +8,12 @@
   "scripts": {
     "dev": "egg-bin dev",
     "migrate": "egg-bin test",
-    "schedule": "node scripts/run-schedule.js"
+    "schedule": "node scripts/run-schedule.js",
+    "release": "standard-version"
   },
   "devDependencies": {
-    "egg-bin": "^3.3.0"
+    "egg-bin": "^3.3.0",
+    "standard-version": "^4.2.0"
   },
   "dependencies": {
     "assert": "^1.4.1",
