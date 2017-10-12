@@ -41,3 +41,11 @@ pip install .
 node script/setup.js
 ```
 Note: You must use the properly user to run this command.
+
+## Run schedule by manual.
+
+The checker is used to check the resource and generate/delete order if does not match.
+To use it please run as follows:
+```bash
+yarn run schedule checker
+```

@@ -107,7 +107,7 @@ exports.createRealtime = async ctx => {
       break;
     }
 
-    await ctx.app.model.Order.createOrder({
+    const order = await ctx.app.model.Order.createOrder({
       "region": orderData.region,
       "resource_name": orderData.resource_name,
       "resource_id": orderData.resource_id,
@@ -117,6 +117,19 @@ exports.createRealtime = async ctx => {
       "total_price": orderData.total_price,
       "user_id": userId,
     }, t);
+
+    if (orderData.meta) {
+      for (let i = 0; i < orderData.meta.length; i++) {
+        const meta = orderData.meta;
+        await ctx.model.OrderMeta.createMeta({
+          "resource_id": orderData.resource_id,
+          "order_id": order.order_id,
+          "name": meta.name,
+          "type": meta.type,
+          "value": meta.value,
+        }, t);
+      }
+    }
 
     userObj.consumption += orderData.total_price;
     if (userObj.reward_value < orderData.total_price) {
