@@ -71,7 +71,7 @@ exports.list = async ctx => {
       }
     });
   }
-
+  await t.commit();
   ctx.body = {
     orders: newOrders,
     total_count: order.count,
