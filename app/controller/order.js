@@ -1,5 +1,22 @@
 'use strict';
 
+exports.listSelect = async ctx => {
+  const t = await ctx.app.model.transaction();
+  var orders = {}
+  if (ctx.request.body.resource_ids) {
+    const resourceIds = ctx.request.body.resource_ids;
+    for (let id in resourceIds) {
+      const allOrders = await ctx.app.model.Order.findAllOrderByResource(resourceIds[id], ctx.request.header.region);
+      orders[resourceIds[id]]=[allOrders[0], allOrders[allOrders.length-1]];
+    }
+  } else {
+    ctx.throw(400, "only order ids and resource ids accept!");
+  }
+  ctx.body = {
+    orders: orders,
+  };
+}
+
 exports.list = async ctx => {
   const userId = ctx.user.id;
   const limit = parseInt(ctx.query.limit, 10) || 10;
@@ -112,8 +129,8 @@ exports.createRealtime = async ctx => {
       "resource_name": orderData.resource_name,
       "resource_id": orderData.resource_id,
       "type": orderData.type,
-      "unit_price": orderData.total_price,
-      "unit": "realtime",
+      "unit_price": orderData.unit_price,
+      "unit": "hour",
       "total_price": orderData.total_price,
       "user_id": userId,
     }, t);
@@ -191,3 +208,61 @@ exports.detail = async ctx => {
     }
   }
 }
+
+exports.close = async ctx => {
+  const resourceId = ctx.params.resourceId;
+  const userId = ctx.params.userId;
+  const opt = {
+    "requestUrl": resourceId,
+  };
+  const result = ctx.service.common.DELETE(opt);
+  ctx.body = {result: result};
+}
+
+/**
+ *Get order created or deleted on YEAR and MONTH in require.
+ */
+exports.getMonthChange = async ctx => {
+  const year = ctx.params.year;
+  const month = ctx.params.month;
+
+  if (!/^\d+$/.test(year)){
+    ctx.throw(400, "Year number should be Integer!");
+  }
+
+  if (!/^\d+$/.test(month) || month<1 || month>12){
+    ctx.throw(400, "Month number is out of bounds!");
+  }
+
+  let monthStart = new Date();
+  monthStart.setYear(year);
+  monthStart.setMonth(month-1);
+  monthStart.setDate(1);
+  monthStart.setHours(0,0,0,0);
+  monthStart = monthStart/1;
+
+  let monthEnd = new Date();
+  monthEnd.setYear(year);
+  monthEnd.setMonth(month);
+  monthEnd.setDate(1);
+  monthEnd.setHours(0,0,0,0);
+  monthEnd = monthEnd-1000;
+
+  let where = {};
+  const pause = {'$between':[monthStart, monthEnd]}
+  if(ctx.params.change == 'open'){
+    where.created_at = pause;
+  }else if(ctx.params.change == 'close'){
+    where.updated_at = pause;
+  }else{
+    ctx.throw(400, "'change' param should be 'open' or 'close'!");
+  };
+  const orders = await ctx.model.Order.findAll({
+    where,
+  });
+
+  ctx.body = {
+    orders,
+  };
+}
+

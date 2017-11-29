@@ -56,9 +56,15 @@ module.exports = app => {
    * API for the order.
    */
   app.get(`/${APIVERSION}/orders`, 'order.list');
+  app.post(`/${APIVERSION}/orders`, 'order.listSelect');
   app.get(`/${APIVERSION}/orders/types`, 'order.getTypes');
   app.get(`/${APIVERSION}/orders/:orderId`, 'order.detail');
   app.post(`/${APIVERSION}/orders/real`, app.middlewares.adminAuth(), 'order.createRealtime');
+  app.delete(`/${APIVERSION}/order/close/:resourceId`, app.middlewares.adminAuth(), 'order.close');
+  /**
+   * param 'change' = 'open' or 'close'
+   */
+  app.get(`/${APIVERSION}/orders/:change/:year/:month`, 'order.getMonthChange');
 
   app.get('/check', 'check.check');
   app.get('/ping', 'check.ping');
