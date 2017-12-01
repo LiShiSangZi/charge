@@ -1,6 +1,6 @@
 {
   "name": "openstack-billing",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "main": "app.js",
   "author": "gogocrow",
   "description": "Billing System for OpenStack Nova/Cinder/Glance/Keystone/Neutron.",
