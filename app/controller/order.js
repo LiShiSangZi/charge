@@ -1,5 +1,25 @@
 'use strict';
 
+/**
+ * List lastest and earliest order for each resource ids in list.
+ */
+exports.listSelect = async ctx => {
+  const t = await ctx.app.model.transaction();
+  var orders = {}
+  if (ctx.request.body.resource_ids) {
+    const resourceIds = ctx.request.body.resource_ids;
+    for (let id in resourceIds) {
+      const allOrders = await ctx.app.model.Order.findAllOrderByResource(resourceIds[id], ctx.request.header.region);
+      orders[resourceIds[id]]=[allOrders[0], allOrders[allOrders.length-1]];
+    }
+  } else {
+    ctx.throw(400, "only resourceId list is accepted!");
+  }
+  ctx.body = {
+    orders: orders,
+  };
+}
+
 exports.list = async ctx => {
   const userId = ctx.user.id;
   const limit = parseInt(ctx.query.limit, 10) || 10;
@@ -112,8 +132,8 @@ exports.createRealtime = async ctx => {
       "resource_name": orderData.resource_name,
       "resource_id": orderData.resource_id,
       "type": orderData.type,
-      "unit_price": orderData.total_price,
-      "unit": "realtime",
+      "unit_price": orderData.unit_price,
+      "unit": "hour",
       "total_price": orderData.total_price,
       "user_id": userId,
     }, t);
@@ -190,4 +210,16 @@ exports.detail = async ctx => {
       };
     }
   }
+}
+/**
+ * Close order for resource id.
+ */
+exports.close = async ctx => {
+  const resourceId = ctx.params.resourceId;
+  const userId = ctx.params.userId;
+  const opt = {
+    "requestUrl": resourceId,
+  };
+  const result = await ctx.service.common.DELETE(opt);
+  ctx.body = {result: result};
 }
