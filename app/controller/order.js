@@ -1,5 +1,8 @@
 'use strict';
 
+/**
+ * List lastest and earliest order for each resource ids in list.
+ */
 exports.listSelect = async ctx => {
   const t = await ctx.app.model.transaction();
   var orders = {}
@@ -10,7 +13,7 @@ exports.listSelect = async ctx => {
       orders[resourceIds[id]]=[allOrders[0], allOrders[allOrders.length-1]];
     }
   } else {
-    ctx.throw(400, "only order ids and resource ids accept!");
+    ctx.throw(400, "only resourceId list is accepted!");
   }
   ctx.body = {
     orders: orders,
@@ -208,13 +211,15 @@ exports.detail = async ctx => {
     }
   }
 }
-
+/**
+ * Close order for resource id.
+ */
 exports.close = async ctx => {
   const resourceId = ctx.params.resourceId;
   const userId = ctx.params.userId;
   const opt = {
     "requestUrl": resourceId,
   };
-  const result = ctx.service.common.DELETE(opt);
+  const result = await ctx.service.common.DELETE(opt);
   ctx.body = {result: result};
 }
