@@ -8,7 +8,7 @@ exports.listSelect = async ctx => {
   if (ctx.request.body.resource_ids) {
     const resourceIds = ctx.request.body.resource_ids;
     for (let id in resourceIds) {
-      const allOrders = await ctx.app.model.Order.findAllOrderByResource(resourceIds[id], ctx.request.header.region);
+      const allOrders = await ctx.app.model.Order.findAllOrderByResource(resourceIds[id]);
       orders[resourceIds[id]]=[allOrders[0], allOrders[allOrders.length-1]];
     }
   } else {
