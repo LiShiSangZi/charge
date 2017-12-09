@@ -93,6 +93,8 @@ module.exports = async(app) => {
   app.beforeStart(function* () {
     app.model.sync();
     app.model.Subscription.sync();
+
+    app.config.coreMiddleware.unshift('access');
   });
 
   process.on('SIGINT', (...args) => {

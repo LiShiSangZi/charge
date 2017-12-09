@@ -39,6 +39,11 @@ exports.port = 7001;
 exports.middleware = ['errorHandler', 'auth'];
 
 const modules = exports.chargeModule.modules;
+
+exports.debug = {
+  enabled: true,
+};
+
 exports.auth = {
   ignoreLink: modules.map(module => module.name),
 };
