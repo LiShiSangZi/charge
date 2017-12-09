@@ -4,7 +4,6 @@
  * List lastest and earliest order for each resource ids in list.
  */
 exports.listSelect = async ctx => {
-  const t = await ctx.app.model.transaction();
   var orders = {}
   if (ctx.request.body.resource_ids) {
     const resourceIds = ctx.request.body.resource_ids;

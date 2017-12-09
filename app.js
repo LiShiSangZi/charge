@@ -93,9 +93,9 @@ module.exports = async(app) => {
   app.beforeStart(function* () {
     app.model.sync();
     app.model.Subscription.sync();
-
-    app.config.coreMiddleware.unshift('access');
   });
+
+  app.config.coreMiddleware.unshift('debug');
 
   process.on('SIGINT', (...args) => {
     console.log('Receive SIGINT  signal!', process.pid);
