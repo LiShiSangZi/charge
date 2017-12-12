@@ -129,11 +129,10 @@ module.exports = app => {
           }
         });
       },
-      async findAllOrderByResource(uuid, region) {
+      async findAllOrderByResource(uuid) {
         return await this.findAll({
           where: {
             resource_id: uuid,
-            region: region,
           },
           order: [
             ['created_at', 'DESC'],
