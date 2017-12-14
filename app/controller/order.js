@@ -4,18 +4,33 @@
  * List lastest and earliest order for each resource ids in list.
  */
 exports.listSelect = async ctx => {
-  var orders = {}
+  var ordersRecords = {};
   if (ctx.request.body.resource_ids) {
     const resourceIds = ctx.request.body.resource_ids;
-    for (let id in resourceIds) {
-      const allOrders = await ctx.app.model.Order.findAllOrderByResource(resourceIds[id]);
-      orders[resourceIds[id]]=[allOrders[0], allOrders[allOrders.length-1]];
+    const orders = await ctx.app.model.Order.findOrdersByResources(resourceIds);
+    for (let id of resourceIds) {
+      ordersRecords[id] = [];
     }
+    for (let order of orders) {
+      ordersRecords[order.resource_id].push(order);
+    }
+    Object.keys(ordersRecords).forEach(resource_id => {
+      var o = ordersRecords[resource_id];
+      if(o.length > 1) {
+        for (let i=1; i <= o.length; i++) {
+          o.splice(1, 1);
+        }
+      } else if (o.length > 0) {
+        o.push(o[0]);
+      } else {
+        o = [null, null];
+      }
+    });
   } else {
     ctx.throw(400, "only resourceId list is accepted!");
   }
   ctx.body = {
-    orders: orders,
+    orders: ordersRecords,
   };
 }
 
