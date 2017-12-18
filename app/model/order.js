@@ -129,19 +129,6 @@ module.exports = app => {
           }
         });
       },
-      async findOrdersByResources(uuids) {
-        return await this.findAll({
-          where: {
-            resource_id:{
-              $or: uuids
-            },
-          },
-          order: [
-            ['created_at', 'DESC'],
-            ['updated_at', 'DESC']
-          ],
-        });
-      },
       async findAndCounts(opt, limit, offset, t) {
         opt.type = {
           $not: 'router-archive',
