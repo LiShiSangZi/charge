@@ -12,7 +12,7 @@ exports.listSelect = async ctx => {
     });
     var string = '';
     function sql(m){
-      string = `SELECT * FROM \`order\` AS o WHERE created_at=(SELECT ${m}(created_at) FROM \`order\` AS i WHERE resource_id IN (${resourceIds.map(r => "'" + r + "'").join(',')}) AND     o.resource_id = i.resource_id )`
+      string = `SELECT * FROM \`order\` AS o WHERE created_at=(SELECT ${m}(created_at) FROM \`order\` AS i WHERE resource_id IN (${resourceIds.map(r => "'" + r + "'").join(',')}) AND o.resource_id = i.resource_id )`
       return string;
     }
     await ctx.app.model.query(sql(`MAX`)).then(orders=>{
