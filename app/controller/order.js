@@ -7,24 +7,23 @@ exports.listSelect = async ctx => {
   var ordersRecords = {};
   if (ctx.request.body.resource_ids) {
     const resourceIds = ctx.request.body.resource_ids;
-    const orders = await ctx.app.model.Order.findOrdersByResources(resourceIds);
-    for (let id of resourceIds) {
-      ordersRecords[id] = [];
+    resourceIds.forEach(id => {
+      ordersRecords[id] = {};
+    });
+    var string = '';
+    function sql(m){
+      string = `SELECT * FROM \`order\` AS o WHERE created_at=(SELECT ${m}(created_at) FROM \`order\` AS i WHERE resource_id IN (${resourceIds.map(r => "'" + r + "'").join(',')}) AND     o.resource_id = i.resource_id )`
+      return string;
     }
-    for (let order of orders) {
-      ordersRecords[order.resource_id].push(order);
-    }
-    Object.keys(ordersRecords).forEach(resource_id => {
-      var o = ordersRecords[resource_id];
-      if(o.length > 1) {
-        for (let i=1; i <= o.length; i++) {
-          o.splice(1, 1);
-        }
-      } else if (o.length > 0) {
-        o.push(o[0]);
-      } else {
-        o = [null, null];
-      }
+    await ctx.app.model.query(sql(`MAX`)).then(orders=>{
+      orders[0].forEach(o => {
+        ordersRecords[o.resource_id]['lastest'] = o;
+      })
+    });
+    await ctx.app.model.query(sql(`MIN`)).then(orders=>{
+      orders[0].forEach(o => {
+        ordersRecords[o.resource_id]['earliest'] = o;
+      })
     });
   } else {
     ctx.throw(400, "only resourceId list is accepted!");
