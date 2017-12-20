@@ -7,17 +7,39 @@ exports.listSelect = async ctx => {
   var ordersRecords = {};
   if (ctx.request.body.resource_ids) {
     const resourceIds = ctx.request.body.resource_ids;
-    const sql = `SELECT * FROM \`order\` AS o WHERE created_at IN ((SELECT MAX(created_at) FROM \`order\` AS max WHERE resource_id IN (${resourceIds.map(r => "'" + r + "'").join(',')}) AND o.resource_id = max.resource_id ),(SELECT MIN(created_at) FROM \`order\` AS min  WHERE resource_id IN (${resourceIds.map(r => "'" + r + "'").join(',')}) AND o.resource_id = min.resource_id )) ORDER BY created_at ASC`;
+    const sql = `SELECT id,resource_id,created_at FROM \`order\` WHERE resource_id IN (${resourceIds.map(r => "'" + r + "'").join(',')}) ORDER BY id ASC`;
     resourceIds.forEach(id => {
       ordersRecords[id] = {"earliest": undefined, "lastest": undefined};
     });
+
+    var tmp = {};
     const orders = await ctx.app.model.query(sql);
     orders[0].forEach(o => {
-      if (!ordersRecords[o.resource_id]['earliest']) {
-        ordersRecords[o.resource_id]['earliest'] = o;
-        ordersRecords[o.resource_id]['lastest'] = o;
-      } else {
-        ordersRecords[o.resource_id]['lastest'] = o;
+      if(!tmp[o.resource_id]) {
+        tmp[o.resource_id] = [];
+      }
+      tmp[o.resource_id].push(o);
+    });
+    var ids;
+    Object.keys(tmp).forEach(resource_id => {
+      if (tmp[resource_id].length > 1) {
+        ids = {"earliestId": tmp[resource_id][0]["id"], "lastestId": tmp[resource_id][tmp[resource_id].length-1]["id"]};
+        tmp[resource_id] = ids;
+      } else if (tmp[resource_id].length == 1) {
+        ids = {"earliestId": tmp[resource_id][0]["id"]};
+        tmp[resource_id] = ids;
+      }
+    });
+    orders[0].forEach(o => {
+      if (tmp[o.resource_id]) {
+        if (o.id == tmp[o.resource_id]["earliestId"]) {
+          ordersRecords[o.resource_id]["earliest"] = o;
+          if (!tmp[o.resource_id].hasOwnProperty("lastestId")){
+            ordersRecords[o.resource_id]["lastest"] = o;
+          }
+        } else if (o.id == tmp[o.resource_id]["lastestId"]) {
+          ordersRecords[o.resource_id]["lastest"] = o;
+        }
       }
     });
   } else {
