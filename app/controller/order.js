@@ -7,7 +7,7 @@ exports.listSelect = async ctx => {
   var ordersRecords = {};
   if (ctx.request.body.resource_ids) {
     const resourceIds = ctx.request.body.resource_ids;
-    const sql = `SELECT id,resource_id,created_at FROM \`order\` WHERE resource_id IN (${resourceIds.map(r => "'" + r + "'").join(',')}) ORDER BY id ASC`;
+    const sql = `SELECT * FROM \`order\` WHERE resource_id IN (${resourceIds.map(r => "'" + r + "'").join(',')}) ORDER BY id ASC`;
     resourceIds.forEach(id => {
       ordersRecords[id] = {"earliest": undefined, "lastest": undefined};
     });
