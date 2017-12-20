@@ -7,7 +7,9 @@ exports.listSelect = async ctx => {
   var ordersRecords = {};
   if (ctx.request.body.resource_ids) {
     const resourceIds = ctx.request.body.resource_ids;
-    const sql = `SELECT * FROM \`order\` WHERE resource_id IN (${resourceIds.map(r => "'" + r + "'").join(',')}) ORDER BY id ASC`;
+    const sql = `SELECT * FROM \`order\` WHERE 
+    resource_id IN (${resourceIds.map(r => "'" + r + "'").join(',')}) 
+    ORDER BY id ASC`;
     resourceIds.forEach(id => {
       ordersRecords[id] = {"earliest": undefined, "lastest": undefined};
     });
@@ -23,7 +25,8 @@ exports.listSelect = async ctx => {
     var ids;
     Object.keys(tmp).forEach(resource_id => {
       if (tmp[resource_id].length > 1) {
-        ids = {"earliestId": tmp[resource_id][0]["id"], "lastestId": tmp[resource_id][tmp[resource_id].length-1]["id"]};
+        ids = {"earliestId": tmp[resource_id][0]["id"], 
+        "lastestId": tmp[resource_id][tmp[resource_id].length-1]["id"]};
         tmp[resource_id] = ids;
       } else if (tmp[resource_id].length == 1) {
         ids = {"earliestId": tmp[resource_id][0]["id"]};
