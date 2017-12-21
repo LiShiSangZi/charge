@@ -34,6 +34,11 @@ exports.chargeModule = {
 /** 是否需要扫描旧表格，并且同步数据。默认为false，不需要。 */
 exports.requireMerge = false;
 
+/**
+ * 是否开启后付费模式。默认为false，不开启，新用户level默认为0；若开启，新用户level默认为9.
+ */
+exports.isPostPay = false;
+
 exports.port = 7001;
 
 exports.middleware = ['errorHandler', 'auth'];

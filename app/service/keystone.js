@@ -135,7 +135,8 @@ module.exports = app => {
               },
               defaults: {
                 user_id: opt.response.user.id,
-                domain_id: opt.response.user.domain_id
+                domain_id: opt.response.user.domain_id,
+                level: this.ctx.app.config.isPostPay?9:0,
               }
             });
             break;
