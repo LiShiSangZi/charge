@@ -4,18 +4,52 @@
  * List lastest and earliest order for each resource ids in list.
  */
 exports.listSelect = async ctx => {
-  var orders = {}
+  var ordersRecords = {};
   if (ctx.request.body.resource_ids) {
     const resourceIds = ctx.request.body.resource_ids;
-    for (let id in resourceIds) {
-      const allOrders = await ctx.app.model.Order.findAllOrderByResource(resourceIds[id]);
-      orders[resourceIds[id]]=[allOrders[0], allOrders[allOrders.length-1]];
-    }
+    const sql = `SELECT * FROM \`order\` WHERE 
+    resource_id IN (${resourceIds.map(r => "'" + r + "'").join(',')}) 
+    ORDER BY id ASC`;
+    resourceIds.forEach(id => {
+      ordersRecords[id] = {"earliest": undefined, "lastest": undefined};
+    });
+
+    var tmp = {};
+    const orders = await ctx.app.model.query(sql);
+    orders[0].forEach(o => {
+      if(!tmp[o.resource_id]) {
+        tmp[o.resource_id] = [];
+      }
+      tmp[o.resource_id].push(o);
+    });
+    var ids;
+    Object.keys(tmp).forEach(resource_id => {
+      if (tmp[resource_id].length > 1) {
+        ids = {"earliestId": tmp[resource_id][0]["id"], 
+        "lastestId": tmp[resource_id][tmp[resource_id].length-1]["id"]};
+        tmp[resource_id] = ids;
+      } else if (tmp[resource_id].length == 1) {
+        ids = {"earliestId": tmp[resource_id][0]["id"]};
+        tmp[resource_id] = ids;
+      }
+    });
+    orders[0].forEach(o => {
+      if (tmp[o.resource_id]) {
+        if (o.id == tmp[o.resource_id]["earliestId"]) {
+          ordersRecords[o.resource_id]["earliest"] = o;
+          if (!tmp[o.resource_id].hasOwnProperty("lastestId")){
+            ordersRecords[o.resource_id]["lastest"] = o;
+          }
+        } else if (o.id == tmp[o.resource_id]["lastestId"]) {
+          ordersRecords[o.resource_id]["lastest"] = o;
+        }
+      }
+    });
   } else {
     ctx.throw(400, "only resourceId list is accepted!");
   }
   ctx.body = {
-    orders: orders,
+    orders: ordersRecords,
   };
 }
 
