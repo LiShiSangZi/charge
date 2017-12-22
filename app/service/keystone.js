@@ -128,6 +128,12 @@ module.exports = app => {
         const type = params[0];
         switch (type) {
           case 'users':
+            var defaultLevel;
+            if (this.ctx.app.config.isPostPay) {
+              defaultLevel = 9;
+            } else {
+              defaultLevel = 0;
+            }
             // This should be a create user API:
             const newAccount = await this.ctx.app.model.Account.findOrCreate({
               where: {
@@ -136,7 +142,7 @@ module.exports = app => {
               defaults: {
                 user_id: opt.response.user.id,
                 domain_id: opt.response.user.domain_id,
-                level: this.ctx.app.config.isPostPay?9:0,
+                level: defaultLevel,
               }
             });
             break;
