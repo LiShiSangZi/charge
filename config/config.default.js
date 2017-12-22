@@ -35,7 +35,7 @@ exports.chargeModule = {
 exports.requireMerge = false;
 
 /**
- * 是否开启后付费模式。默认为false，不开启，新用户level默认为0；若开启，新用户level默认为9.
+ * 是否开启后付费模式。默认为false，不开启，新用户level默认为0；若开启，新用户level默认为9。
  */
 exports.isPostPay = false;
 
