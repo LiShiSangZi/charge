@@ -173,7 +173,7 @@ async function operationOrders(ctx, region, product, t,
       }
       const userId = project.user_id;
       const account = accountMap.get(userId);
-      if (account && account.level < 9) {
+      if (account && account.level < 4) {
 
         print(chalk.red(`The resource ${resource.id} does not have an order! Create one.`));
         /** The resource does not have order. create one. */
