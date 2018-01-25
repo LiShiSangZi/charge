@@ -130,7 +130,7 @@ module.exports = app => {
           case 'users':
             var defaultLevel;
             if (this.ctx.app.config.isPostPay) {
-              defaultLevel = 9;
+              defaultLevel = 6;
             } else {
               defaultLevel = 0;
             }

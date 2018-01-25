@@ -64,7 +64,10 @@ module.exports = app => {
 
   app.get('/check', 'check.check');
   app.get('/ping', 'check.ping');
-  
+  /**
+   * API for clean resources belonging to 'tester' or 'debtor'.
+   */
+  app.get('/clean/:who', 'clean.clean');
 
   app.all('/:module', 'middleware.catch');
 }

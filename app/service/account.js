@@ -11,6 +11,33 @@ module.exports = (app) => {
     async getBalance(account) {
       return account.balance.toFixed(4);
     }
+    /**
+     * Check the power of the account
+     * level_binary[1]:该用户不会因为欠费而无法创建资源
+     * level_binary[2]:该用户不会在欠费的时候被删资源
+     * level_binary[3]:该用户为测试用户
+     */
+    async checkAccountPower(level) {
+      var power = {
+        is_allow_out_of_balance_create: true,
+        is_ban_out_of_balance_delete: true,
+        is_tester: true,
+      };
+
+      const level_binary = ("000" + parseInt(level).toString(2)).substr(-3);
+      if (level_binary[0] != "1") {
+        power.is_allow_out_of_balance_create = false;
+      }
+      if (level_binary[1] != "1") {
+        power.is_ban_out_of_balance_delete = false;
+      }
+      if (level_binary[2] != "1") {
+        power.is_tester = false;
+      }
+
+      return power;
+    }
+
 
     async setAccount(account, opt) {
       const resultData = account.dataValues;
