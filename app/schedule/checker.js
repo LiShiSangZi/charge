@@ -407,6 +407,9 @@ module.exports = app => {
             product_id: {
               $notIn: productKeys,
             },
+            status: {
+              $not: 'deleted'
+            }
           },
           transaction: t,
         });
