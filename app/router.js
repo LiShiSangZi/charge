@@ -15,13 +15,6 @@ module.exports = app => {
   app.put(`/${APIVERSION}/products/:product_id`, app.middlewares.adminAuth(), 'product.update');
   app.get(`/${APIVERSION}/products/price`, 'product.showPrice');
 
-  // app.get(`/${APIVERSION}/products`, 'product.list');
-  // app.get(`/${APIVERSION}/products/detail`, 'product.detail');
-  // app.post(`/${APIVERSION}/products`, 'product.create');
-  // app.delete(`/${APIVERSION}/products/:product_id`, 'product.delete');
-  // app.put(`/${APIVERSION}/products/:product_id`, 'product.update');
-  // app.get(`/${APIVERSION}/products/price`, 'product.showPrice');
-
   app.get(`/${APIVERSION}/accounts/:userId`, app.middlewares.userAuth(), 'account.detail');
   app.put(`/${APIVERSION}/accounts/:userId`, app.middlewares.adminAuth(), 'account.charge');
   app.put(`/${APIVERSION}/accounts/:userId/level`, app.middlewares.adminAuth(), 'account.setLevel');
@@ -61,6 +54,12 @@ module.exports = app => {
   app.get(`/${APIVERSION}/orders/:orderId`, 'order.detail');
   app.post(`/${APIVERSION}/orders/real`, app.middlewares.adminAuth(), 'order.createRealtime');
   app.delete(`/${APIVERSION}/order/:resourceId`, app.middlewares.adminAuth(), 'order.close');
+
+  /**
+   * API for the statistics
+   */
+  const statisticsRoot = `/${APIVERSION}/statistics`;
+  app.get(`${statisticsRoot}/orders`, app.middlewares.adminAuth(), 'statistics.order');
 
   app.get('/check', 'check.check');
   app.get('/ping', 'check.ping');
