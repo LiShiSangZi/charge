@@ -165,6 +165,7 @@ exports.createRealtime = async ctx => {
       "resource_name": orderData.resource_name,
       "resource_id": orderData.resource_id,
       "type": orderData.type,
+      "project_id": orderData.project_id,
       "unit_price": orderData.unit_price,
       "unit": "hour",
       "total_price": orderData.total_price,
